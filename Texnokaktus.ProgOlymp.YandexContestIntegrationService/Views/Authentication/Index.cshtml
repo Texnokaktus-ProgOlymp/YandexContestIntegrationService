@@ -1,0 +1,27 @@
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Authorization";
+}
+
+<h1>Authorization</h1>
+
+<form asp-controller="Authentication" asp-action="Login" method="post">
+    <div class="my-2">
+        <label class="sr-only" asp-for="Username">Username</label>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">@@</div>
+            </div>
+            <input type="text" asp-for="Username" class="form-control" placeholder="Username">
+        </div>
+    </div>
+    <div class="my-2">
+        <label asp-for="Password">Password</label>
+        <div class="input-group">
+            <input type="password" asp-for="Password" class="form-control" placeholder="Password"/>
+        </div>
+    </div>
+    <input type="hidden" asp-for="RedirectUrl" value="@Model.RedirectUrl">
+    <button type="submit" class="btn btn-primary col-lg-12">Login</button>
+</form>

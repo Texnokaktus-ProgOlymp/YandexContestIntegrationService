@@ -1,7 +1,27 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Texnokaktus.ProgOlymp.Identity;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddIdentityServices(builder.Configuration);
+
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
+builder.Services
+       .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+       .AddCookie(x =>
+        {
+            x.ExpireTimeSpan = TimeSpan.FromMinutes(40);
+            x.Cookie.MaxAge = x.ExpireTimeSpan;
+            x.SlidingExpiration = true;
+            x.LoginPath = "/authentication";
+            x.LogoutPath = "/authentication/logout";
+            x.ReturnUrlParameter = "redirectUrl";
+            x.AccessDeniedPath = "/accessDenied";
+        });
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -18,10 +38,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-                       name: "default",
+app.MapControllerRoute(name: "default",
                        pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
