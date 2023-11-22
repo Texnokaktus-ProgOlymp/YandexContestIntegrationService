@@ -13,7 +13,7 @@
             <div class="input-group-prepend">
                 <div class="input-group-text">@@</div>
             </div>
-            <input type="text" asp-for="Username" class="form-control" placeholder="Username">
+            <input type="text" asp-for="Username" class="form-control" placeholder="Username" value="@Model.Username">
         </div>
     </div>
     <div class="my-2">
@@ -23,5 +23,9 @@
         </div>
     </div>
     <input type="hidden" asp-for="RedirectUrl" value="@Model.RedirectUrl">
+    @if (ViewData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
     <button type="submit" class="btn btn-primary col-lg-12">Login</button>
 </form>
