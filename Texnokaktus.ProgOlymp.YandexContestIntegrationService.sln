@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj", "{150D2CBE-6C83-4821-A37C-DB86D357CD61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Texnokaktus.ProgOlymp.YandexContestIntegrationService", "Texnokaktus.ProgOlymp.YandexContestIntegrationService\Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj", "{9FAC16B2-FB46-477E-8EB4-5339E6B8F445}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{150D2CBE-6C83-4821-A37C-DB86D357CD61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{150D2CBE-6C83-4821-A37C-DB86D357CD61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{150D2CBE-6C83-4821-A37C-DB86D357CD61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{150D2CBE-6C83-4821-A37C-DB86D357CD61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FAC16B2-FB46-477E-8EB4-5339E6B8F445}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FAC16B2-FB46-477E-8EB4-5339E6B8F445}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FAC16B2-FB46-477E-8EB4-5339E6B8F445}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FAC16B2-FB46-477E-8EB4-5339E6B8F445}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
