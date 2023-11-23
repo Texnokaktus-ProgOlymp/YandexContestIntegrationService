@@ -1,9 +1,13 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using Texnokaktus.ProgOlymp.Identity;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services
+       .AddIdentityServices(builder.Configuration)
+       .AddDataAccess(optionsBuilder => optionsBuilder.UseSqlServer("data source=raspberrypi.local;initial catalog=YandexContestIntegration;User Id=sa;Password=Raspberry-Pi;Encrypt=True;TrustServerCertificate=True"));
 
 builder.Services.AddControllersWithViews();
 
@@ -44,4 +48,4 @@ app.UseAuthorization();
 app.MapControllerRoute(name: "default",
                        pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.Run();
+await app.RunAsync();

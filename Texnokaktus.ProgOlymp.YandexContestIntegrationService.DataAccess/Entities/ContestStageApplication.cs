@@ -4,7 +4,7 @@ public class ContestStageApplication
 {
     public int Id { get; set; }
     public int AccountId { get; set; }
-    public int ContextStageId { get; set; }
+    public int ContestStageId { get; set; }
     public ApplicationState State { get; set; }
     public DateTime CreatedUtc { get; set; }
 }

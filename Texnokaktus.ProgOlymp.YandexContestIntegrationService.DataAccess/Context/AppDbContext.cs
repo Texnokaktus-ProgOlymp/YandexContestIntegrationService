@@ -14,7 +14,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
                builder.HasKey(application => application.Id);
                builder.Property(application => application.Id).UseIdentityColumn();
 
-               builder.HasAlternateKey(application => new { application.AccountId, application.ContextStageId });
+               builder.HasAlternateKey(application => new { application.AccountId, ContextStageId = application.ContestStageId });
 
                builder.Property(application => application.CreatedUtc)
                       .HasConversion(time => time.ToUniversalTime(),
