@@ -23,8 +23,6 @@ public class AuthenticationController(ILogger<AuthenticationController> logger, 
     [HttpPost]
     public async Task<IActionResult> LoginAsync(LoginModel loginModel)
     {
-        logger.LogInformation("POST Login {@Model}", loginModel);
-
         ClaimsIdentity userIdentity;
         try
         {
