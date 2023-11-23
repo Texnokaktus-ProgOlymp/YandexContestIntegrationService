@@ -6,5 +6,5 @@ public sealed record StubAuthentication
     public string Login { get; init; }
     public string PasswordHex { get; init; }
     public string Salt { get; init; }
-    public string[] Roles { get; init; }
+    public string[]? Roles { get; init; }
 }

@@ -37,6 +37,9 @@ internal class StubIdentityService(IOptions<AuthenticationConfig> configuration,
         var identity = new ClaimsIdentity(AuthenticationScheme, ClaimTypes.Name, ClaimTypes.Role);
         identity.AddClaim(new(ClaimTypes.NameIdentifier, username + Guid.NewGuid().ToString("N")));
         identity.AddClaim(new(ClaimTypes.Name, username, ClaimValueTypes.String));
+
+        if (_configuration.StubAuthentication.Roles is null) return identity;
+
         foreach (var role in _configuration.StubAuthentication.Roles)
             identity.AddClaim(new(ClaimTypes.Role, role));
 
