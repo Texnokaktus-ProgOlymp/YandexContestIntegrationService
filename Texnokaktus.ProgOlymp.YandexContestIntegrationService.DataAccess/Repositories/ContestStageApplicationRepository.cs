@@ -30,7 +30,13 @@ internal class ContestStageApplicationRepository(AppDbContext context) : IContes
         return entityEntry.Entity;
     }
 
-    public async Task ChangeStateAsync(int id, ApplicationState state)
+    public async Task<ApplicationState?> GetStateAsync(int id) =>
+        await context.ContestStageApplications
+                     .Where(application => application.ContestStageId == id)
+                     .Select(application => application.State)
+                     .FirstOrDefaultAsync();
+
+    public async Task SetStateAsync(int id, ApplicationState state)
     {
         var application = await GetAsync(id);
         if (application is null) return;

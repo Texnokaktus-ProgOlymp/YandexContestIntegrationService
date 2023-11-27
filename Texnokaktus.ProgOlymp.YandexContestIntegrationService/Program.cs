@@ -2,11 +2,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Texnokaktus.ProgOlymp.Identity;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Context;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
+       .AddLogicLayerServices()
        .AddIdentityServices(builder.Configuration)
        .AddDataAccess(optionsBuilder => optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultDb")));
 
@@ -21,7 +22,7 @@ builder.Services
             x.ExpireTimeSpan = TimeSpan.FromMinutes(40);
             x.Cookie.MaxAge = x.ExpireTimeSpan;
             x.SlidingExpiration = true;
-            x.LoginPath = "/authentication";
+            x.LoginPath = "/authentication/login";
             x.LogoutPath = "/authentication/logout";
             x.ReturnUrlParameter = "redirectUrl";
             x.AccessDeniedPath = "/accessDenied";
@@ -37,6 +38,8 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseStatusCodePagesWithReExecute("/home/error/{0}");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

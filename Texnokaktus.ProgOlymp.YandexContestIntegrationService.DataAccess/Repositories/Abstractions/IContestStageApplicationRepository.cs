@@ -8,5 +8,6 @@ public interface IContestStageApplicationRepository
     Task<ContestStageApplication?> GetAsync(int id);
     Task<IList<ContestStageApplication>> GetAllAsync(ApplicationState? state);
     ContestStageApplication Add(ContestStageApplicationInsertModel insertModel);
-    Task ChangeStateAsync(int id, ApplicationState state);
+    Task<ApplicationState?> GetStateAsync(int id);
+    Task SetStateAsync(int id, ApplicationState state);
 }

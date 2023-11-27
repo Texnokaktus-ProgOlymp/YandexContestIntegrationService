@@ -16,6 +16,8 @@
     <ItemGroup>
       <ProjectReference Include="..\Texnokaktus.ProgOlymp.Identity\Texnokaktus.ProgOlymp.Identity.csproj" />
       <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj" />
+      <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain.csproj" />
+      <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj" />
     </ItemGroup>
 
 </Project>
