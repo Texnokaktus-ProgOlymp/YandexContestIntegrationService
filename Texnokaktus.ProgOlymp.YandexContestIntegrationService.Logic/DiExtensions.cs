@@ -8,5 +8,6 @@ public static class DiExtensions
 {
     public static IServiceCollection AddLogicLayerServices(this IServiceCollection services) =>
         services.AddScoped<IApplicationService, ApplicationService>()
-                .AddScoped<IApplicationStateService, ApplicationStateService>();
+                .AddScoped<IApplicationStateService, ApplicationStateService>()
+                .AddScoped<IContestStageService, ContestStageService>();
 }
