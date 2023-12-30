@@ -3,5 +3,5 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Entit
 public class ContestStage
 {
     public int Id { get; init; }
-    public long YandexContestId { get; init; }
+    public long? YandexContestId { get; init; }
 }
