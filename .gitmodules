@@ -1,0 +1,4 @@
+[submodule "modules/Common.Contracts"]
+	path = modules/Common.Contracts
+	url = git@github.com:Texnokaktus-ProgOlymp/Common.Contracts.git
+	branch = master
