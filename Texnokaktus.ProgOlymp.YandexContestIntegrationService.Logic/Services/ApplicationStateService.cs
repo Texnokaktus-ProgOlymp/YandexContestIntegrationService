@@ -13,11 +13,6 @@ internal class ApplicationStateService(IContestStageApplicationRepository reposi
             KeyValuePair.Create(ApplicationState.Pending,
                                 new[]
                                 {
-                                    (ApplicationAction.Start, ApplicationState.Processing)
-                                }),
-            KeyValuePair.Create(ApplicationState.Processing,
-                                new[]
-                                {
                                     (ApplicationAction.Finish, ApplicationState.Finished),
                                     (ApplicationAction.Fail, ApplicationState.Failed)
                                 }),

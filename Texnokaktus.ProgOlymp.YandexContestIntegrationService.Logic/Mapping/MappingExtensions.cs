@@ -19,7 +19,6 @@ internal static class MappingExtensions
         applicationState switch
         {
             DataAccess.Entities.ApplicationState.Pending => ApplicationState.Pending,
-            DataAccess.Entities.ApplicationState.Processing => ApplicationState.Processing,
             DataAccess.Entities.ApplicationState.Finished => ApplicationState.Finished,
             DataAccess.Entities.ApplicationState.Failed => ApplicationState.Failed,
             _ => throw new ArgumentOutOfRangeException(nameof(applicationState), applicationState, null)
@@ -29,7 +28,6 @@ internal static class MappingExtensions
         applicationState switch
         {
             ApplicationState.Pending    => DataAccess.Entities.ApplicationState.Pending,
-            ApplicationState.Processing => DataAccess.Entities.ApplicationState.Processing,
             ApplicationState.Finished   => DataAccess.Entities.ApplicationState.Finished,
             ApplicationState.Failed     => DataAccess.Entities.ApplicationState.Failed,
             _ => throw new ArgumentOutOfRangeException(nameof(applicationState), applicationState, null)
