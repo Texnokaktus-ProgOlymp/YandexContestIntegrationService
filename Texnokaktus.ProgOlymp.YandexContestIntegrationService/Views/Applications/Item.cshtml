@@ -1,0 +1,32 @@
+@model Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain.ContestStageApplication
+
+@{
+    ViewBag.Title = "Applications";
+}
+
+<h1>Application @Model.Id</h1>
+
+<div>
+    <div>
+        <div class="text-secondary d-inline">Transaction Id:</div>
+        <div class="d-inline">@Model.TransactionId</div>
+    </div>
+    <div>
+        <div class="text-secondary d-inline">Yandex ID login:</div>
+        <div class="d-inline">@Model.YandexIdLogin</div>
+    </div>
+    <div>
+        <div class="text-secondary d-inline">Contest stage Id:</div>
+        <div class="d-inline">@Model.ContestStageId</div>
+    </div>
+    <div>
+        <div class="text-secondary d-inline">Created at</div>
+        <div class="d-inline">@Model.CreatedUtc.ToLocalTime()</div>
+    </div>
+    <div>
+        <div class="text-secondary d-inline">State</div>
+        @{
+            await Html.RenderPartialAsync("StateBadge", Model.State);
+        }
+    </div>
+</div>

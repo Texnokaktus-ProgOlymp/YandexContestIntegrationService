@@ -1,0 +1,14 @@
+@model Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain.ContestStageApplication
+
+<tr>
+    <td><a asp-action="Item" asp-route-id="@Model.Id">@Model.Id</a></td>
+    <td>@Model.TransactionId</td>
+    <td>@Model.YandexIdLogin</td>
+    <td>@Model.ContestStageId</td>
+    <td>
+        @{
+            await Html.RenderPartialAsync("StateBadge", @Model.State);
+        }
+    </td>
+    <td>@Model.CreatedUtc</td>
+</tr>

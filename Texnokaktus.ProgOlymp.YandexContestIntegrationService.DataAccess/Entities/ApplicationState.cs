@@ -3,7 +3,6 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Entit
 public enum ApplicationState
 {
     Pending,
-    Processing,
     Finished,
     Failed
 }

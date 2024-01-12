@@ -1,0 +1,3 @@
+namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Models.Configuration;
+
+public record JobSettings(JobConfiguration ApplicationProcessingJob);

@@ -1,0 +1,14 @@
+@model Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain.ContestStage
+
+@{
+    ViewBag.Title = $"Contest stage {Model.Id}";
+}
+
+<h1>Contest stage @Model.Id</h1>
+
+<div>
+    <div>
+        <div class="text-secondary d-inline">Yandex Contest Id:</div>
+        <div class="d-inline">@Model.YandexContestId</div>
+    </div>
+</div>

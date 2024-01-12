@@ -219,3 +219,4 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+appsettings.Secrets.json
