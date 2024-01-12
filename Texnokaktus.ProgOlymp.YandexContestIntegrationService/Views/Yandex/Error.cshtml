@@ -1,0 +1,11 @@
+﻿@model YandexAuthError
+
+@{
+    ViewBag.Title = "OAuth error";
+}
+
+<h1>OAuth error</h1>
+
+<p>Yandex server returned an error: <b>@Model.Error</b></p>
+
+<p>Error description: <b>@Model.ErrorDescription</b></p>

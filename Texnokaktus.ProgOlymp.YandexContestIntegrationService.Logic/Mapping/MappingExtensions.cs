@@ -8,7 +8,8 @@ internal static class MappingExtensions
         new()
         {
             Id = application.Id,
-            AccountId = application.AccountId,
+            TransactionId = application.TransactionId,
+            YandexIdLogin = application.YandexIdLogin,
             ContestStageId = application.ContestStageId,
             State = MapApplicationState(application.State),
             CreatedUtc = application.CreatedUtc

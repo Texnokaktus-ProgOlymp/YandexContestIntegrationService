@@ -1,0 +1,17 @@
+@model bool
+
+@{
+    ViewBag.Title = "Yandex Authentication Check";
+}
+
+<h1>Yandex Authentication Check</h1>
+
+@if (Model)
+{
+    <p>The application is authenticated.</p>
+}
+else
+{
+    <p>The application is not authenticated.</p>
+    <p>Please, <a asp-action="Auth">authenticate</a>.</p>
+}

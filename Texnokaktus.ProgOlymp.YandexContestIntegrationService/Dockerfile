@@ -1,18 +1,28 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER $APP_UID
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
+EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService/"]
+COPY ["Texnokaktus.ProgOlymp.Identity/Texnokaktus.ProgOlymp.Identity.csproj", "Texnokaktus.ProgOlymp.Identity/"]
+COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess/Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess/"]
+COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain/Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain/"]
+COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic/Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic/"]
+COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient/Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient/"]
+COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options/Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options/"]
+COPY ["modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts.csproj", "modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/"]
 RUN dotnet restore "Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj"
 COPY . .
 WORKDIR "/src/Texnokaktus.ProgOlymp.YandexContestIntegrationService"
-RUN dotnet build "Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" -c Release -o /app/build
+RUN dotnet build "Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" -c Release -o /app/publish /p:UseAppHost=false
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

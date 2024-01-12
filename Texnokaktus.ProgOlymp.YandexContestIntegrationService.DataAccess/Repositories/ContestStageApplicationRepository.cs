@@ -21,7 +21,8 @@ internal class ContestStageApplicationRepository(AppDbContext context) : IContes
     {
         var application = new ContestStageApplication
         {
-            AccountId = insertModel.AccountId,
+            TransactionId = insertModel.TransactionId,
+            YandexIdLogin = insertModel.YandexIdLogin,
             ContestStageId = insertModel.ContestStageId,
             State = insertModel.State,
             CreatedUtc = insertModel.CreatedUtc

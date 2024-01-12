@@ -8,16 +8,30 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+        <ProjectReference Include="..\modules\Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts.csproj" />
+        <ProjectReference Include="..\Texnokaktus.ProgOlymp.Identity\Texnokaktus.ProgOlymp.Identity.csproj" />
+        <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj" />
+        <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain.csproj" />
+        <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj" />
+        <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient\Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Texnokaktus.ProgOlymp.Identity\Texnokaktus.ProgOlymp.Identity.csproj" />
-      <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj" />
-      <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain.csproj" />
-      <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj" />
+        <PackageReference Include="MassTransit.AspNetCore" Version="7.3.1" />
+        <PackageReference Include="MassTransit.RabbitMQ" Version="8.1.3" />
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.1" />
+        <PackageReference Include="Serilog.Enrichers.AssemblyName" Version="1.0.9" />
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+        <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="6.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 
 </Project>

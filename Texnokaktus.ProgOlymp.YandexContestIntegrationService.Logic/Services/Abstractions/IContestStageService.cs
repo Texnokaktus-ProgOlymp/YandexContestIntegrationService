@@ -7,4 +7,5 @@ public interface IContestStageService
     Task<IEnumerable<ContestStage>> GetContestStagesAsync();
     Task<ContestStage?> GetContestStageAsync(int id);
     Task AddContestStageAsync(ContestStage contestStage);
+    Task AddContestStageAsync(int contestStageId);
 }
