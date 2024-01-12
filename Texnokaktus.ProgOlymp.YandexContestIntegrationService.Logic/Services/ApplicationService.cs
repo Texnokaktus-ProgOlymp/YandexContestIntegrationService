@@ -15,6 +15,12 @@ internal class ApplicationService(IUnitOfWork unitOfWork, TimeProvider timeProvi
         return applications.Select(a => a.MapContestStageApplication());
     }
 
+    public async Task<IEnumerable<ContestStageApplication>> GetPendingApplicationsAsync()
+    {
+        var applications = await unitOfWork.ContestStageApplicationRepository.GetAllAsync(ApplicationState.Pending);
+        return applications.Select(a => a.MapContestStageApplication());
+    }
+
     public async Task<ContestStageApplication?> GetApplicationAsync(int id)
     {
         var application = await unitOfWork.ContestStageApplicationRepository.GetAsync(id);

@@ -2,10 +2,11 @@
 
 public class ContestStageApplication
 {
-    public int Id { get; init; }
-    public int TransactionId { get; init; }
-    public string YandexIdLogin { get; init; }
-    public int ContestStageId { get; init; }
-    public ApplicationState State { get; init; }
-    public DateTime CreatedUtc { get; init; }
+    public required int Id { get; init; }
+    public required int TransactionId { get; init; }
+    public required string YandexIdLogin { get; init; }
+    public required int ContestStageId { get; init; }
+    public required long? YandexContestId { get; init; }
+    public required ApplicationState State { get; init; }
+    public required DateTime CreatedUtc { get; init; }
 }

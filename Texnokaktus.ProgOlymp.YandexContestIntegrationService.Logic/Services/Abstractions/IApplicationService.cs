@@ -5,6 +5,7 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.A
 public interface IApplicationService
 {
     Task<IEnumerable<ContestStageApplication>> GetApplicationsAsync();
+    Task<IEnumerable<ContestStageApplication>> GetPendingApplicationsAsync();
     Task<ContestStageApplication?> GetApplicationAsync(int id);
     Task AddApplicationAsync(int transactionId, int contestStageId, string yandexIdLogin);
 }

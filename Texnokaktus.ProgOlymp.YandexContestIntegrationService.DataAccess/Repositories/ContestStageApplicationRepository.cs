@@ -15,6 +15,7 @@ internal class ContestStageApplicationRepository(AppDbContext context) : IContes
     public async Task<IList<ContestStageApplication>> GetAllAsync(ApplicationState? state) =>
         await context.ContestStageApplications
                      .WhereIf(state.HasValue, application => application.State == state!.Value)
+                     .Include(application => application.ContestStage)
                      .ToListAsync();
 
     public ContestStageApplication Add(ContestStageApplicationInsertModel insertModel)

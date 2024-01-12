@@ -1,12 +1,12 @@
 using System.Collections.Frozen;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Repositories.Abstractions;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Services.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Mapping;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 
-internal class ApplicationStateService(IContestStageApplicationRepository repository) : IApplicationStateService
+internal class ApplicationStateService(IUnitOfWork unitOfWork) : IApplicationStateService
 {
     private static readonly FrozenDictionary<ApplicationState, (ApplicationAction action, ApplicationState newState)[]> Transitions = new[]
         {
@@ -30,7 +30,7 @@ internal class ApplicationStateService(IContestStageApplicationRepository reposi
     
     public async Task<IEnumerable<ApplicationAction>> GetAvailableActionsAsync(int applicationId)
     {
-        var applicationState = (await repository.GetStateAsync(applicationId))?.MapApplicationState();
+        var applicationState = (await unitOfWork.ContestStageApplicationRepository.GetStateAsync(applicationId))?.MapApplicationState();
         if (!applicationState.HasValue) return Enumerable.Empty<ApplicationAction>();
 
         return Transitions.TryGetValue(applicationState.Value, out var transitions)
@@ -40,7 +40,7 @@ internal class ApplicationStateService(IContestStageApplicationRepository reposi
 
     public async Task InvokeApplicationAction(int applicationId, ApplicationAction action)
     {
-        var applicationState = (await repository.GetStateAsync(applicationId))?.MapApplicationState()
+        var applicationState = (await unitOfWork.ContestStageApplicationRepository.GetStateAsync(applicationId))?.MapApplicationState()
                             ?? throw new("Could not find the current state of the application");
 
         if (!Transitions.TryGetValue(applicationState, out var transitions))
@@ -51,6 +51,8 @@ internal class ApplicationStateService(IContestStageApplicationRepository reposi
         
         var newState = transitions.Single(t => t.action == action).newState;
 
-        await repository.SetStateAsync(applicationId, newState.MapApplicationState());
+        await unitOfWork.ContestStageApplicationRepository.SetStateAsync(applicationId, newState.MapApplicationState());
+
+        await unitOfWork.SaveChangesAsync();
     }
 }

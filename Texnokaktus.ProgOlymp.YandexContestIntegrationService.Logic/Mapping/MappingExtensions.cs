@@ -11,6 +11,7 @@ internal static class MappingExtensions
             TransactionId = application.TransactionId,
             YandexIdLogin = application.YandexIdLogin,
             ContestStageId = application.ContestStageId,
+            YandexContestId = application.ContestStage.YandexContestId,
             State = MapApplicationState(application.State),
             CreatedUtc = application.CreatedUtc
         };
