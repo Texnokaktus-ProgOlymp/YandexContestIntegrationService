@@ -27,7 +27,7 @@ internal class ApplicationService(IUnitOfWork unitOfWork, TimeProvider timeProvi
                                                                  yandexIdLogin,
                                                                  contestStageId,
                                                                  ApplicationState.Pending,
-                                                                 timeProvider.GetUtcNow().DateTime);
+                                                                 timeProvider.GetUtcNow().UtcDateTime);
         unitOfWork.ContestStageApplicationRepository.Add(insertModel);
         await unitOfWork.SaveChangesAsync();
     }
