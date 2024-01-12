@@ -42,6 +42,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddMassTransit(configurator =>
 {
     configurator.AddConsumer<ContestStageCreatedConsumer>();
+    configurator.AddConsumer<RegisterUserConsumer>();
 
     configurator.UsingRabbitMq((context, factoryConfigurator) =>
     {
@@ -49,6 +50,8 @@ builder.Services.AddMassTransit(configurator =>
         factoryConfigurator.ConfigureEndpoints(context);
     });
 });
+
+builder.Services.AddSingleton(TimeProvider.System);
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 

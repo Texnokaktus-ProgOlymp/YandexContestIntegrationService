@@ -6,4 +6,5 @@ public interface IApplicationService
 {
     Task<IEnumerable<ContestStageApplication>> GetApplicationsAsync();
     Task<ContestStageApplication?> GetApplicationAsync(int id);
+    Task AddApplicationAsync(int transactionId, int contestStageId, string yandexIdLogin);
 }
