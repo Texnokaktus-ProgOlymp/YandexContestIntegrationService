@@ -13,5 +13,14 @@
 else
 {
     <p>The application is not authenticated.</p>
-    <p>Please, <a asp-action="Auth">authenticate</a>.</p>
+    <div class="text-center">
+        <a asp-action="Auth">
+            <div class="yandex-button">
+                <div class="yandex-button-content">
+                    @Html.Raw(await File.ReadAllTextAsync("wwwroot/img/yandex-logo-en.svg"))
+                    @Html.Raw(await File.ReadAllTextAsync("wwwroot/img/text-wrapper-en.svg"))
+                </div>
+            </div>
+        </a>
+    </div>
 }
