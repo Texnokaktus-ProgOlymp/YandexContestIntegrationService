@@ -7,7 +7,6 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
 public static class DiExtensions
 {
     public static IServiceCollection AddLogicLayerServices(this IServiceCollection services) =>
-        services.AddScoped<IApplicationService, ApplicationService>()
-                .AddScoped<IApplicationStateService, ApplicationStateService>()
-                .AddScoped<IContestStageService, ContestStageService>();
+        services.AddScoped<IContestStageService, ContestStageService>()
+                .AddScoped<IRegistrationService, RegistrationService>();
 }

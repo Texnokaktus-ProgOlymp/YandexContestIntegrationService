@@ -6,7 +6,7 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Controllers;
 
 public class HomeController : Controller
 {
-    public IActionResult Index() => RedirectToAction("Index", "Applications");
+    public IActionResult Index() => NoContent();
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error() =>

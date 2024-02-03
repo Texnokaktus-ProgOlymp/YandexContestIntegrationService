@@ -1,15 +1,13 @@
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Quartz;
 using Serilog;
 using Texnokaktus.ProgOlymp.Identity;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Consumers;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Jobs;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Models.Configuration;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,7 +43,6 @@ builder.Services.AddAuthorization();
 builder.Services.AddMassTransit(configurator =>
 {
     configurator.AddConsumer<ContestStageCreatedConsumer>();
-    configurator.AddConsumer<RegisterUserConsumer>();
 
     configurator.UsingRabbitMq((context, factoryConfigurator) =>
     {
@@ -56,18 +53,7 @@ builder.Services.AddMassTransit(configurator =>
 
 builder.Services.AddSingleton(TimeProvider.System);
 
-builder.Services
-       .AddQuartz(configurator =>
-        {
-            var jobSettings = builder.Configuration.GetSection(nameof(JobSettings)).Get<JobSettings>()
-                           ?? throw new("Unable to read job settings");
-
-            configurator.AddJob<ApplicationProcessingJob>(jobConfigurator => jobConfigurator.WithIdentity(nameof(ApplicationProcessingJob)).DisallowConcurrentExecution());
-            configurator.AddTrigger(triggerConfigurator => triggerConfigurator.ForJob(nameof(ApplicationProcessingJob))
-                                                                              .WithIdentity($"{nameof(ApplicationProcessingJob)}-trigger")
-                                                                              .WithCronSchedule(jobSettings.ApplicationProcessingJob.CronSchedule));
-        })
-       .AddQuartzHostedService();
+builder.Services.AddGrpc();
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
@@ -90,6 +76,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapGrpcService<YandexContestServiceImpl>();
 
 app.MapControllerRoute(name: "default",
                        pattern: "{controller=Home}/{action=Index}/{id?}");
