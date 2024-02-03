@@ -41,6 +41,33 @@ public class YandexContestServiceImpl(IRegistrationService registrationService, 
 
     public override async Task<UnregisterParticipantResponse> UnregisterParticipant(UnregisterParticipantRequest request, ServerCallContext context)
     {
-        return new();
+        try
+        {
+            await registrationService.UnregisterUserAsync(request.ContestStageId, request.YandexIdLogin);
+            return new();
+        }
+        catch (RpcApplicationException e)
+        {
+            return new()
+            {
+                Error = new()
+                {
+                    Type = e.ErrorType,
+                    Message = e.Message
+                }
+            };
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "An error occurred while registering the user to the contest");
+            return new()
+            {
+                Error = new()
+                {
+                    Type = ErrorType.Generic,
+                    Message = e.Message
+                }
+            };
+        }
     }
 }
