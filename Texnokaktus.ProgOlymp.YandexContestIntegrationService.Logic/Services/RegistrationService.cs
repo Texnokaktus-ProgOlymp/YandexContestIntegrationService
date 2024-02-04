@@ -21,7 +21,7 @@ internal class RegistrationService(IUnitOfWork unitOfWork, IContestClient contes
 
         try
         {
-            var contestUserId = await contestClient.RegisterParticipantByLogin(yandexContestId, yandexIdLogin);
+            var contestUserId = await contestClient.RegisterParticipantByLoginAsync(yandexContestId, yandexIdLogin);
             unitOfWork.ContestUserRepository.Add(new(contestStage.Id, yandexIdLogin, contestUserId));
             await unitOfWork.SaveChangesAsync();
         }
@@ -31,8 +31,20 @@ internal class RegistrationService(IUnitOfWork unitOfWork, IContestClient contes
         }
     }
 
-    public Task UnregisterUserAsync(int contestStageId, string yandexIdLogin)
+    public async Task UnregisterUserAsync(int contestStageId, string yandexIdLogin)
     {
-        throw new NotImplementedException();
+        if (await unitOfWork.ContestStageRepository.GetAsync(contestStageId) is not { } contestStage)
+            throw new ContestStageDoesNotExistException(contestStageId);
+
+        if (contestStage.YandexContestId is not { } yandexContestId)
+            throw new YandexContestIdNotSetException(contestStageId);
+
+
+        var contestUser = await unitOfWork.ContestUserRepository.GetAsync(contestStageId, yandexIdLogin)
+                       ?? throw new UserIsNotRegisteredException(contestStageId, yandexIdLogin);
+
+        await contestClient.UnregisterParticipantAsync(yandexContestId, contestUser.ContestUserId);
+        
+        await unitOfWork.ContestUserRepository.DeleteAsync(new(contestStageId, yandexIdLogin));
     }
 }

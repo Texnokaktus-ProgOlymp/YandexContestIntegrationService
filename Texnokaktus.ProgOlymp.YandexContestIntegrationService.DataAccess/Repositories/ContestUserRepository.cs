@@ -29,4 +29,10 @@ internal class ContestUserRepository(AppDbContext context) : IContestUserReposit
                      .Where(contestUser => contestUser.ContestStageId == model.ContestStageId
                                         && contestUser.YandexIdLogin == model.YandexIdLogin)
                      .ExecuteDeleteAsync();
+
+    public async Task<ContestUser?> GetAsync(int contestStageId, string yandexIdLogin) =>
+        await context.ContestUsers.AsNoTracking()
+                     .Where(user => user.ContestStageId == contestStageId
+                                 && user.YandexIdLogin == yandexIdLogin)
+                     .FirstOrDefaultAsync();
 }

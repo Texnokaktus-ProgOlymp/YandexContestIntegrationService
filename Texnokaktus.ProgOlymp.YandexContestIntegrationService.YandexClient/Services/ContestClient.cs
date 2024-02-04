@@ -7,7 +7,7 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Ser
 
 internal class ContestClient(IRestClient client) : IContestClient
 {
-    public async Task<long> RegisterParticipantByLogin(long contestId, string login)
+    public async Task<long> RegisterParticipantByLoginAsync(long contestId, string login)
     {
         var request = new RestRequest("contests/{contestId}/participants").AddUrlSegment("contestId", contestId)
                                                                           .AddQueryParameter("login", login);
@@ -25,7 +25,7 @@ internal class ContestClient(IRestClient client) : IContestClient
         return long.Parse(response.Content ?? throw new InvalidOperationException("Invalid API response"));
     }
 
-    public async Task UnregisterParticipant(long contestId, long participantId)
+    public async Task UnregisterParticipantAsync(long contestId, long participantId)
     {
         var request = new RestRequest("contests/{contestId}/participants/{participantId}").AddUrlSegment("contestId", contestId)
                                                                                           .AddUrlSegment("participantId", participantId);

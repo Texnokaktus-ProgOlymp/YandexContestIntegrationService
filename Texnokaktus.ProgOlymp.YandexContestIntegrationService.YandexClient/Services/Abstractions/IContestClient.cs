@@ -2,6 +2,6 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Ser
 
 public interface IContestClient
 {
-    Task<long> RegisterParticipantByLogin(long contestId, string login);
-    Task UnregisterParticipant(long contestId, long participantId);
+    Task<long> RegisterParticipantByLoginAsync(long contestId, string login);
+    Task UnregisterParticipantAsync(long contestId, long participantId);
 }
