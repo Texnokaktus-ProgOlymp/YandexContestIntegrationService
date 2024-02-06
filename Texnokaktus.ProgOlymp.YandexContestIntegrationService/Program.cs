@@ -77,7 +77,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGrpcService<YandexContestServiceImpl>();
+app.MapGrpcService<RegistrationServiceImpl>();
 
 app.MapControllerRoute(name: "default",
                        pattern: "{controller=Home}/{action=Index}/{id?}");

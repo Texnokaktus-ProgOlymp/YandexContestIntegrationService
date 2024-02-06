@@ -5,7 +5,7 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstr
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class YandexContestServiceImpl(IRegistrationService registrationService, ILogger<YandexContestServiceImpl> logger) : YandexContestService.YandexContestServiceBase
+public class RegistrationServiceImpl(IRegistrationService registrationService, ILogger<RegistrationServiceImpl> logger) : RegistrationService.RegistrationServiceBase
 {
     public override async Task<RegisterParticipantResponse> RegisterParticipant(RegisterParticipantRequest request, ServerCallContext context)
     {
