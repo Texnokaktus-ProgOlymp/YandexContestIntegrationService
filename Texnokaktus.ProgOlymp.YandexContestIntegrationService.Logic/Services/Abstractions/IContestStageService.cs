@@ -8,4 +8,5 @@ public interface IContestStageService
     Task<ContestStage?> GetContestStageAsync(int id);
     Task AddContestStageAsync(ContestStage contestStage);
     Task AddContestStageAsync(int contestStageId);
+    Task SetYandexContestIdAsync(int contestStageId, long yandexContestId);
 }

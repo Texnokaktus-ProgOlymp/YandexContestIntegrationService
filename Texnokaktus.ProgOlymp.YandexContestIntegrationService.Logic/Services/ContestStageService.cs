@@ -33,6 +33,12 @@ internal class ContestStageService(IUnitOfWork unitOfWork, ILogger<ContestStageS
                             + $"Note that you must set the {nameof(ContestStage.YandexContestId)} value for this Contest Stage manually",
                               contestStageId);
     }
+
+    public async Task SetYandexContestIdAsync(int contestStageId, long yandexContestId)
+    {
+        await unitOfWork.ContestStageRepository.UpdateAsync(contestStageId, stage => stage.YandexContestId ??= yandexContestId);
+        await unitOfWork.SaveChangesAsync();
+    }
 }
 
 file static class MappingExtensions

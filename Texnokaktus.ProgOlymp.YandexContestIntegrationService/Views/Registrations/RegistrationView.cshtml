@@ -1,0 +1,9 @@
+@model Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain.ContestRegistration
+
+<tr>
+    <td>@Model.Id</td>
+    <td><a asp-controller="ContestStages" asp-action="Item" asp-route-id="@Model.ContestStageId">@Model.ContestStageId</a></td>
+    <td>@Model.YandexContestId</td>
+    <td>@Model.YandexIdLogin</td>
+    <td>@Model.ContestUserId</td>
+</tr>

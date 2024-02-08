@@ -35,4 +35,10 @@ internal class ContestUserRepository(AppDbContext context) : IContestUserReposit
                      .Where(user => user.ContestStageId == contestStageId
                                  && user.YandexIdLogin == yandexIdLogin)
                      .FirstOrDefaultAsync();
+
+    public async Task<IList<ContestUser>> GetAllAsync() =>
+        await context.ContestUsers
+                     .AsNoTracking()
+                     .Include(contestUser => contestUser.ContestStage)
+                     .ToListAsync();
 }

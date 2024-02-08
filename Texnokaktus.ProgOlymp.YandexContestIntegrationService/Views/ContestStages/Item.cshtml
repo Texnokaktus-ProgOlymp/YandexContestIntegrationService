@@ -7,8 +7,20 @@
 <h1>Contest stage @Model.Id</h1>
 
 <div>
-    <div>
-        <div class="text-secondary d-inline">Yandex Contest Id:</div>
-        <div class="d-inline">@Model.YandexContestId</div>
-    </div>
+    @if (Model.YandexContestId is { } yandexContestId)
+    {
+        <div>
+            <div class="text-secondary d-inline">Yandex Contest Id:</div>
+            <div class="d-inline">@yandexContestId</div>
+        </div>
+    }
+    else
+    {
+        <form asp-controller="ContestStages" asp-action="UpdateItem" asp-route-id="@Model.Id" method="post">
+            <input type="hidden" asp-for="Id" value="@Model.Id"/>
+            <label asp-for="YandexContestId">Yandex Contest ID</label>
+            <input asp-for="YandexContestId" type="text"/>
+            <input type="submit" value="Update"/>
+        </form>
+    }
 </div>
