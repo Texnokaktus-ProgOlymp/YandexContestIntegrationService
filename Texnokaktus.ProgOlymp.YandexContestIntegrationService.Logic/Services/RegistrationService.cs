@@ -8,7 +8,7 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 
 internal class RegistrationService(IUnitOfWork unitOfWork, IContestClient contestClient) : IRegistrationService
 {
-    public async Task RegisterUserAsync(int contestStageId, string yandexIdLogin)
+    public async Task<string> RegisterUserAsync(int contestStageId, string yandexIdLogin)
     {
         if (await unitOfWork.ContestStageRepository.GetAsync(contestStageId) is not { } contestStage)
             throw new ContestStageDoesNotExistException(contestStageId);
@@ -24,6 +24,7 @@ internal class RegistrationService(IUnitOfWork unitOfWork, IContestClient contes
             var contestUserId = await contestClient.RegisterParticipantByLoginAsync(yandexContestId, yandexIdLogin);
             unitOfWork.ContestUserRepository.Add(new(contestStage.Id, yandexIdLogin, contestUserId));
             await unitOfWork.SaveChangesAsync();
+            return $"https://contest.yandex.ru/contest/{yandexContestId}/enter/";
         }
         catch (InvalidUserException e)
         {
