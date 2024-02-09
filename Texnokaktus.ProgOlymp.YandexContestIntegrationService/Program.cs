@@ -12,8 +12,6 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.Secrets.json", false);
-
 builder.Services
        .AddLogicLayerServices()
        .AddIdentityServices(builder.Configuration)
