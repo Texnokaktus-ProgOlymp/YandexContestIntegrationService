@@ -18,7 +18,7 @@ builder.Services
        .AddDataAccess(optionsBuilder => optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultDb")))
        .AddServiceOptions()
        .AddYandexClientServices()
-       .AddStackExchangeRedisCache(options => options.Configuration = "raspberrypi.local");
+       .AddStackExchangeRedisCache(options => options.Configuration = builder.Configuration.GetConnectionString("DefaultRedis"));
 
 builder.Services.AddControllersWithViews();
 
