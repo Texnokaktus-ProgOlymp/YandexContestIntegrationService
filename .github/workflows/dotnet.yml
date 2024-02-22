@@ -23,7 +23,7 @@ jobs:
       with:
         dotnet-version: 8.x.x
     - name: Setup NuGet
-      run: dotnet nuget add source --username kav128 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Texnokaktus-ProgOlymp/index.json"
+      run: dotnet nuget add source --username Texnokaktus-ProgOlymp --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Texnokaktus-ProgOlymp/index.json"
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
