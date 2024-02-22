@@ -6,6 +6,7 @@ EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
+ARG GHPAT
 WORKDIR /src
 COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService/"]
 COPY ["Texnokaktus.ProgOlymp.Identity/Texnokaktus.ProgOlymp.Identity.csproj", "Texnokaktus.ProgOlymp.Identity/"]
@@ -15,6 +16,7 @@ COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic/Texnokaktus.P
 COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient/Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient/"]
 COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options/Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options/"]
 COPY ["modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts.csproj", "modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/"]
+RUN dotnet nuget add source --username kav128 --password $GHPAT --store-password-in-clear-text --name "GitHub TexnoKaktus-Progolymp" https://nuget.pkg.github.com/Texnokaktus-ProgOlymp/index.json
 RUN dotnet restore "Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj"
 COPY . .
 WORKDIR "/src/Texnokaktus.ProgOlymp.YandexContestIntegrationService"
