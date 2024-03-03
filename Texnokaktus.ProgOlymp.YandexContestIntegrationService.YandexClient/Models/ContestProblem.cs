@@ -22,10 +22,8 @@ public record ContestProblem
     [JsonPropertyName("problemType")]
     public string ProblemType { get; set; }
 
-    /*
     [JsonPropertyName("statements")]
     public Statement[] Statements { get; set; }
-    */
 
     [JsonPropertyName("testCount")]
     public int TestCount { get; set; }
