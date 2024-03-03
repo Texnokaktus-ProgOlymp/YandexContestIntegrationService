@@ -38,6 +38,26 @@ internal class ContestClient(IRestClient client) : IContestClient
         await client.ExecuteGetAndThrowAsync<ContestProblems>("contests/{contestId}/problems",
                                                               request => request.AddUrlSegment("contestId", contestId)
                                                                                 .AddQueryParameter("locale", locale));
+
+    public async Task<ContestStandings> GetContestStandingsAsync(long contestId,
+                                                                 bool forJudge = false,
+                                                                 string locale = "ru",
+                                                                 int page = 1,
+                                                                 int pageSize = 100,
+                                                                 string? participantSearch = null,
+                                                                 bool showExternal = false,
+                                                                 bool showVirtual = false,
+                                                                 long? userGroupId = null) =>
+        await client.ExecuteGetAndThrowAsync<ContestStandings>("contests/{contestId}/standings",
+                                                               request => request.AddUrlSegment("contestId", contestId)
+                                                                  .AddQueryParameter("forJudge", forJudge)
+                                                                  .AddQueryParameter("locale", locale)
+                                                                  .AddQueryParameter("page", page)
+                                                                  .AddQueryParameter("pageSize", pageSize)
+                                                                  .AddQueryParameter("participantSearch", participantSearch)
+                                                                  .AddQueryParameter("showExternal", showExternal)
+                                                                  .AddQueryParameter("showVirtual", showVirtual)
+                                                                  .AddQueryParameter("userGroupId", userGroupId));
 }
 
 file static class ApiClientExtensions
@@ -66,4 +86,7 @@ file static class ApiClientExtensions
 
         return response.Data;
     }
+
+    public static RestRequest AddQueryParameter<T>(this RestRequest request, string name, T? value, bool encode = true) where T : struct =>
+        value.HasValue ? request.AddQueryParameter(name, value.Value, encode) : request;
 }
