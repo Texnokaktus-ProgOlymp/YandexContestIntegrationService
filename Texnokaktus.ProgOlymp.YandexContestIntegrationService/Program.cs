@@ -74,6 +74,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGrpcService<ContestDataServiceImpl>();
 app.MapGrpcService<RegistrationServiceImpl>();
 
 app.MapControllerRoute(name: "default",

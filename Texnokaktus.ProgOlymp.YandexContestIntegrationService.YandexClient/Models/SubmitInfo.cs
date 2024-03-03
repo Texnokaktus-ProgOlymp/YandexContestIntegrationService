@@ -5,7 +5,7 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Mod
 public record SubmitInfo
 {
     [JsonPropertyName("participantId")]
-    public long ParticipantInfo { get; set; }
+    public long ParticipantId { get; set; }
 
     [JsonPropertyName("participantName")]
     public string ParticipantName { get; set; }
