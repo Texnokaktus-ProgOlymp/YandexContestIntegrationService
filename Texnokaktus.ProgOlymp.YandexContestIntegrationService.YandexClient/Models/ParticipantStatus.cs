@@ -14,7 +14,7 @@ public record ParticipantStatus
     public DateTimeOffset? FinishTime { get; set; }
 
     [JsonPropertyName("participantLeftTimeMillis")]
-    public int LeftTimeMilliseconds { get; set; }
+    public long LeftTimeMilliseconds { get; set; }
 
     [JsonPropertyName("contestState")]
     public ParticipationState State { get; set; }

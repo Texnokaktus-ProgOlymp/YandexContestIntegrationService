@@ -2,17 +2,7 @@ using System.Globalization;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
-using CompilerLimit = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.CompilerLimit;
-using ContestProblem = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestProblem;
-using ContestStandings = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStandings;
-using ContestStandingsTitle = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStandingsTitle;
-using ContestStatistics = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStatistics;
-using ParticipantInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantInfo;
-using ProblemResult = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ProblemResult;
-using Statement = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Statement;
-using SubmitInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.SubmitInfo;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
@@ -39,6 +29,16 @@ public class ContestDataServiceImpl(IContestClient contestClient) : ContestDataS
             Result = contestStandings.MapContestStandings()
         };
     }
+
+    public override async Task<ParticipantStatusResponse> GetParticipantStatus(ParticipantStatusRequest request, ServerCallContext context)
+    {
+        var participantStatus = await contestClient.GetParticipantStatusAsync(request.ContestId, 117335839L);
+
+        return new()
+        {
+            Result = participantStatus.MapParticipationStatus()
+        };
+    }
 }
 
 file static class MappingExtensions
@@ -49,7 +49,7 @@ file static class MappingExtensions
             Alias = contestProblem.Alias,
             Compilers = { contestProblem.Compilers },
             Id = contestProblem.Id,
-            Limits = { contestProblem.Limits.Select(limit => limit.MapCompilerLimit())  },
+            Limits = { contestProblem.Limits.Select(limit => limit.MapCompilerLimit()) },
             Name = contestProblem.Name,
             ProblemType = contestProblem.ProblemType,
             Statements = { contestProblem.Statements.Select(statement => statement.MapStatement()) },
@@ -92,7 +92,7 @@ file static class MappingExtensions
             Titles = { contestStandings.Titles.Select(title => title.MapContestStandingsTitle()) }
         };
 
-    private static ContestStandingRow MapContestStandingRow(this ContestStandingsRow contestStandingsRow) =>
+    private static ContestStandingRow MapContestStandingRow(this YandexClient.Models.ContestStandingsRow contestStandingsRow) =>
         new()
         {
             ParticipantInfo = contestStandingsRow.ParticipantInfo.MapParticipantInfo(),
@@ -152,5 +152,23 @@ file static class MappingExtensions
         {
             Name = contestStandingsTitle.Name,
             Title = contestStandingsTitle.Title
+        };
+
+    public static ParticipantStatus MapParticipationStatus(this YandexClient.Models.ParticipantStatus participantStatus) =>
+        new()
+        {
+            Name = participantStatus.Name,
+            StartTime = participantStatus.StartTime?.ToTimestamp(),
+            FinishTime = participantStatus.FinishTime?.ToTimestamp(),
+            LeftTimeMilliseconds = participantStatus.LeftTimeMilliseconds,
+            State = participantStatus.State.MapParticipationState()
+        };
+
+    private static ParticipationState MapParticipationState(this YandexClient.Models.ParticipationState participationState) =>
+        participationState switch
+        {
+            YandexClient.Models.ParticipationState.InProgress => ParticipationState.InProgress,
+            YandexClient.Models.ParticipationState.Finished   => ParticipationState.Finished,
+            _                                                 => ParticipationState.NotStarted
         };
 }
