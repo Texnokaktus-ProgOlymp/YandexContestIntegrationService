@@ -2,11 +2,24 @@ using System.Globalization;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Repositories.Abstractions;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
+using CompilerLimit = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.CompilerLimit;
+using ContestProblem = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestProblem;
+using ContestStandings = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStandings;
+using ContestStandingsTitle = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStandingsTitle;
+using ContestStatistics = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStatistics;
+using ParticipantInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantInfo;
+using ParticipantStatus = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantStatus;
+using ParticipationState = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipationState;
+using ProblemResult = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ProblemResult;
+using Statement = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Statement;
+using SubmitInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.SubmitInfo;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class ContestDataServiceImpl(IContestClient contestClient) : ContestDataService.ContestDataServiceBase
+public class ContestDataServiceImpl(IContestClient contestClient, IContestUserRepository contestUserRepository) : ContestDataService.ContestDataServiceBase
 {
     public override async Task<GetProblemsResponse> GetProblems(GetProblemsRequest request, ServerCallContext context)
     {
@@ -32,7 +45,10 @@ public class ContestDataServiceImpl(IContestClient contestClient) : ContestDataS
 
     public override async Task<ParticipantStatusResponse> GetParticipantStatus(ParticipantStatusRequest request, ServerCallContext context)
     {
-        var participantStatus = await contestClient.GetParticipantStatusAsync(request.ContestId, 117335839L);
+        if (await contestUserRepository.GetAsync(request.ContestId, request.ParticipantLogin) is not { } contestUser)
+            return new();
+
+        var participantStatus = await contestClient.GetParticipantStatusAsync(request.ContestId, contestUser.ContestUserId);
 
         return new()
         {
@@ -92,7 +108,7 @@ file static class MappingExtensions
             Titles = { contestStandings.Titles.Select(title => title.MapContestStandingsTitle()) }
         };
 
-    private static ContestStandingRow MapContestStandingRow(this YandexClient.Models.ContestStandingsRow contestStandingsRow) =>
+    private static ContestStandingRow MapContestStandingRow(this ContestStandingsRow contestStandingsRow) =>
         new()
         {
             ParticipantInfo = contestStandingsRow.ParticipantInfo.MapParticipantInfo(),
