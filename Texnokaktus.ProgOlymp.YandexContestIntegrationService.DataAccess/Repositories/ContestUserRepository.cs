@@ -31,7 +31,9 @@ internal class ContestUserRepository(AppDbContext context) : IContestUserReposit
                      .ExecuteDeleteAsync();
 
     public async Task<ContestUser?> GetAsync(int contestStageId, string yandexIdLogin) =>
-        await context.ContestUsers.AsNoTracking()
+        await context.ContestUsers
+                     .AsNoTracking()
+                     .Include(contestUser => contestUser.ContestStage)
                      .Where(user => user.ContestStageId == contestStageId
                                  && user.YandexIdLogin == yandexIdLogin)
                      .FirstOrDefaultAsync();

@@ -48,7 +48,10 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestUserRe
         if (await contestUserRepository.GetAsync(request.ContestId, request.ParticipantLogin) is not { } contestUser)
             return new();
 
-        var participantStatus = await contestClient.GetParticipantStatusAsync(request.ContestId, contestUser.ContestUserId);
+        if (contestUser.ContestStage.YandexContestId is not { } yandexContestId)
+            return new();
+
+        var participantStatus = await contestClient.GetParticipantStatusAsync(yandexContestId, contestUser.ContestUserId);
 
         return new()
         {
