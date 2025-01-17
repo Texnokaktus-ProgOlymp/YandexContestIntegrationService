@@ -68,6 +68,7 @@ if (!app.Environment.IsDevelopment())
 
 app.MapGet("api/contests/{contestId:long}/problems", async(long contestId, IContestClient c) => await c.GetContestProblemsAsync(contestId));
 app.MapGet("api/contests/{contestId:long}/standings", async (long contestId, string? participant, IContestClient c) => await c.GetContestStandingsAsync(contestId, forJudge: true, participantSearch: participant));
+app.MapGet("api/contests/{contestId:long}/participants/{participantId:long}", async (long contestId, long participantId, IContestClient c) => await c.GetParticipantStatusAsync(contestId, participantId));
 
 app.UseStatusCodePagesWithReExecute("/home/error/{0}");
 

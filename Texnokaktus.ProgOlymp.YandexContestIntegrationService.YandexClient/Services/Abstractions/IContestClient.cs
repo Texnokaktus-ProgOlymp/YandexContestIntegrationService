@@ -7,6 +7,7 @@ public interface IContestClient
     Task<long> RegisterParticipantByLoginAsync(long contestId, string login);
     Task UnregisterParticipantAsync(long contestId, long participantId);
     Task<ContestProblems> GetContestProblemsAsync(long contestId, string locale = "ru");
+
     Task<ContestStandings> GetContestStandingsAsync(long contestId,
                                                     bool forJudge = false,
                                                     string locale = "ru",
@@ -16,4 +17,6 @@ public interface IContestClient
                                                     bool showExternal = false,
                                                     bool showVirtual = false,
                                                     long? userGroupId = null);
+
+    Task<ParticipantStatus> GetParticipantStatusAsync(long contestId, long participantId);
 }

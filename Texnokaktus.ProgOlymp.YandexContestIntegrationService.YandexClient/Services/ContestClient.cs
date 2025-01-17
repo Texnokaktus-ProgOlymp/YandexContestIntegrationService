@@ -58,6 +58,11 @@ internal class ContestClient(IRestClient client) : IContestClient
                                                                   .AddQueryParameter("showExternal", showExternal)
                                                                   .AddQueryParameter("showVirtual", showVirtual)
                                                                   .AddQueryParameter("userGroupId", userGroupId));
+
+    public async Task<ParticipantStatus> GetParticipantStatusAsync(long contestId, long participantId) =>
+        await client.ExecuteGetAndThrowAsync<ParticipantStatus>("contests/{contestId}/participants/{participantId}",
+                                                                request => request.AddUrlSegment("contestId", contestId)
+                                                                   .AddUrlSegment("participantId", participantId));
 }
 
 file static class ApiClientExtensions
