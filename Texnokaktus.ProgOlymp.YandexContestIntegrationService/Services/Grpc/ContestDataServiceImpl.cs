@@ -2,7 +2,17 @@ using System.Globalization;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
+using CompilerLimit = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.CompilerLimit;
+using ContestProblem = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestProblem;
+using ContestStandings = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStandings;
+using ContestStandingsTitle = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStandingsTitle;
+using ContestStatistics = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStatistics;
+using ParticipantInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantInfo;
+using ProblemResult = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ProblemResult;
+using Statement = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Statement;
+using SubmitInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.SubmitInfo;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
@@ -22,7 +32,8 @@ public class ContestDataServiceImpl(IContestClient contestClient) : ContestDataS
         var contestStandings = await contestClient.GetContestStandingsAsync(request.ContestId,
                                                                             forJudge: true,
                                                                             page: request.PageIndex,
-                                                                            pageSize: request.PageSize);
+                                                                            pageSize: request.PageSize,
+                                                                            participantSearch: request.ParticipantSearch);
         return new()
         {
             Result = contestStandings.MapContestStandings()
@@ -81,7 +92,7 @@ file static class MappingExtensions
             Titles = { contestStandings.Titles.Select(title => title.MapContestStandingsTitle()) }
         };
 
-    private static ContestStandingRow MapContestStandingRow(this YandexClient.Models.ContestStandingsRow contestStandingsRow) =>
+    private static ContestStandingRow MapContestStandingRow(this ContestStandingsRow contestStandingsRow) =>
         new()
         {
             ParticipantInfo = contestStandingsRow.ParticipantInfo.MapParticipantInfo(),
