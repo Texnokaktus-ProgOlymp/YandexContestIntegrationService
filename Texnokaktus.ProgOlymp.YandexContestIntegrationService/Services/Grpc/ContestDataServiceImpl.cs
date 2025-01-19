@@ -19,7 +19,7 @@ using SubmitInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Sub
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class ContestDataServiceImpl(IContestClient contestClient, IContestUserRepository contestUserRepository) : ContestDataService.ContestDataServiceBase
+public class ContestDataServiceImpl(IContestClient contestClient, IContestStageRepository contestStageRepository, IContestUserRepository contestUserRepository) : ContestDataService.ContestDataServiceBase
 {
     public override async Task<GetProblemsResponse> GetProblems(GetProblemsRequest request, ServerCallContext context)
     {
@@ -32,7 +32,10 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestUserRe
 
     public override async Task<GetStandingsResponse> GetStandings(GetStandingsRequest request, ServerCallContext context)
     {
-        var contestStandings = await contestClient.GetContestStandingsAsync(request.ContestId,
+        if (await contestStageRepository.GetAsync(request.ContestId) is not { YandexContestId: { } yandexContestId })
+            return new();
+
+        var contestStandings = await contestClient.GetContestStandingsAsync(yandexContestId,
                                                                             forJudge: true,
                                                                             page: request.PageIndex,
                                                                             pageSize: request.PageSize,
