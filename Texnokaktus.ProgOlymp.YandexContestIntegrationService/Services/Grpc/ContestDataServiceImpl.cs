@@ -6,21 +6,37 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Repositor
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
 using CompilerLimit = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.CompilerLimit;
+using ContestDescription = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestDescription;
 using ContestProblem = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestProblem;
 using ContestStandings = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStandings;
 using ContestStandingsTitle = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStandingsTitle;
 using ContestStatistics = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStatistics;
+using ContestType = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestType;
 using ParticipantInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantInfo;
 using ParticipantStatus = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantStatus;
 using ParticipationState = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipationState;
 using ProblemResult = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ProblemResult;
 using Statement = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Statement;
 using SubmitInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.SubmitInfo;
+using UpsolvingAllowance = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.UpsolvingAllowance;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
 public class ContestDataServiceImpl(IContestClient contestClient, IContestStageRepository contestStageRepository, IContestUserRepository contestUserRepository) : ContestDataService.ContestDataServiceBase
 {
+    public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
+    {
+        if (await contestStageRepository.GetAsync(request.ContestId) is not { YandexContestId: { } yandexContestId })
+            return new();
+
+        var contestDescription = await contestClient.GetContestDescriptionAsync(yandexContestId);
+
+        return new()
+        {
+            Result = contestDescription.MapContestDescription()
+        };
+    }
+
     public override async Task<GetProblemsResponse> GetProblems(GetProblemsRequest request, ServerCallContext context)
     {
         var contestProblems = await contestClient.GetContestProblemsAsync(request.ContestId);
@@ -100,9 +116,7 @@ file static class MappingExtensions
                 "BINARY"   => StatementType.Binary,
                 "OLYMP"    => StatementType.Olymp,
                 "MARKDOWN" => StatementType.Markdown,
-                _          => throw new ArgumentOutOfRangeException(nameof(YandexClient.Models.Statement.Type),
-                                                                    statement.Type,
-                                                                    "Invalid statement type")
+                _          => throw new ArgumentOutOfRangeException(nameof(statement), statement.Type, "Invalid statement type")
             }
         };
 
@@ -192,5 +206,37 @@ file static class MappingExtensions
             YandexClient.Models.ParticipationState.InProgress => ParticipationState.InProgress,
             YandexClient.Models.ParticipationState.Finished   => ParticipationState.Finished,
             _                                                 => ParticipationState.NotStarted
+        };
+
+    public static ContestDescription MapContestDescription(
+        this YandexClient.Models.ContestDescription contestDescription) =>
+        new()
+        {
+            Name = contestDescription.Name,
+            StartTime = contestDescription.StartTime.ToTimestamp(),
+            Duration = TimeSpan.FromSeconds(contestDescription.DurationSeconds).ToDuration(),
+            FreezeTime = contestDescription.FreezeTimeSeconds is { } freezeTimeSeconds
+                             ? TimeSpan.FromSeconds(freezeTimeSeconds)
+                                       .ToDuration()
+                             : null,
+            Type = contestDescription.Type.MapContestType(),
+            UpsolvingAllowance = contestDescription.UpsolvingAllowance.MapUpsolvingAllowance()
+        };
+
+    private static ContestType MapContestType(this YandexClient.Models.ContestType contestType) =>
+        contestType switch
+        {
+            YandexClient.Models.ContestType.Usual   => ContestType.Usual,
+            YandexClient.Models.ContestType.Virtual => ContestType.Virtual,
+            _                                       => throw new ArgumentOutOfRangeException(nameof(contestType), contestType, "Invalid contest type")
+        };
+
+    private static UpsolvingAllowance MapUpsolvingAllowance(this YandexClient.Models.UpsolvingAllowance upsolvingAllowance) =>
+        upsolvingAllowance switch
+        {
+            YandexClient.Models.UpsolvingAllowance.Prohibited                    => UpsolvingAllowance.Prohibited,
+            YandexClient.Models.UpsolvingAllowance.AllowedAfterParticipationEnds => UpsolvingAllowance.AllowedAfterParticipationEnds,
+            YandexClient.Models.UpsolvingAllowance.AllowedAfterContestEnds       => UpsolvingAllowance.AllowedAfterContestEnds,
+            _                                                                    => throw new ArgumentOutOfRangeException(nameof(upsolvingAllowance), upsolvingAllowance, "Invalid upsolving allowance type")
         };
 }

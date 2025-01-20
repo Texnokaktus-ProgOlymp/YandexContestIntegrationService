@@ -34,6 +34,10 @@ internal class ContestClient(IRestClient client) : IContestClient
         response.ThrowIfError();
     }
 
+    public async Task<ContestDescription> GetContestDescriptionAsync(long contestId) =>
+        await client.ExecuteGetAndThrowAsync<ContestDescription>("contests/{contestId}",
+                                                                 request => request.AddUrlSegment("contestId", contestId));
+
     public async Task<ContestProblems> GetContestProblemsAsync(long contestId, string locale = "ru") =>
         await client.ExecuteGetAndThrowAsync<ContestProblems>("contests/{contestId}/problems",
                                                               request => request.AddUrlSegment("contestId", contestId)
