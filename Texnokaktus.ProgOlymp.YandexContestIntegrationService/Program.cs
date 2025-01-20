@@ -1,7 +1,13 @@
+using System.Diagnostics;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
+using StackExchange.Redis;
 using Texnokaktus.ProgOlymp.Identity;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Consumers;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
@@ -18,8 +24,11 @@ builder.Services
        .AddIdentityServices(builder.Configuration)
        .AddDataAccess(optionsBuilder => optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultDb")))
        .AddServiceOptions()
-       .AddYandexClientServices()
-       .AddStackExchangeRedisCache(options => options.Configuration = builder.Configuration.GetConnectionString("DefaultRedis"));
+       .AddYandexClientServices();
+
+var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(builder.Configuration.GetConnectionString("DefaultRedis")!);
+builder.Services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
+builder.Services.AddStackExchangeRedisCache(options => options.ConnectionMultiplexerFactory = () => Task.FromResult<IConnectionMultiplexer>(connectionMultiplexer));
 
 builder.Services.AddControllersWithViews();
 
@@ -56,7 +65,27 @@ builder.Services.AddGrpc();
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
+builder.Services
+       .AddOpenTelemetry()
+       .ConfigureResource(resourceBuilder => resourceBuilder.AddService(Process.GetCurrentProcess().ProcessName))
+       .WithTracing(tracerProviderBuilder => tracerProviderBuilder.AddAspNetCoreInstrumentation()
+                                                                  .AddHttpClientInstrumentation()
+                                                                  .AddRedisInstrumentation()
+                                                                  .AddSqlClientInstrumentation()
+                                                                  .AddGrpcClientInstrumentation()
+                                                                  .AddOtlpExporter(options =>
+                                                                   {
+                                                                       options.Endpoint = new(builder.Configuration.GetConnectionString("OtlpReceiver")!);
+                                                                       options.Protocol = OtlpExportProtocol.Grpc;
+                                                                   }))
+       .WithMetrics(meterProviderBuilder => meterProviderBuilder.AddAspNetCoreInstrumentation()
+                                                                .AddSqlClientInstrumentation()
+                                                                .AddHttpClientInstrumentation()
+                                                                .AddPrometheusExporter());
+
 var app = builder.Build();
+
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
