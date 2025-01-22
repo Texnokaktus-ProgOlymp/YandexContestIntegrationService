@@ -2,6 +2,7 @@ using System.Diagnostics;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -62,6 +63,8 @@ builder.Services.AddMassTransit(configurator =>
 builder.Services.AddSingleton(TimeProvider.System);
 
 builder.Services.AddGrpc();
+builder.Services.AddGrpcReflection();
+builder.Services.AddGrpcHealthChecks().AddCheck("Default", () => HealthCheckResult.Healthy());
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
@@ -88,12 +91,18 @@ var app = builder.Build();
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.MapGrpcReflectionService();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.MapGrpcHealthChecksService();
 
 app.MapGet("api/contests/{contestId:long}/problems", async(long contestId, IContestClient c) => await c.GetContestProblemsAsync(contestId));
 app.MapGet("api/contests/{contestId:long}/standings", async (long contestId, string? participant, IContestClient c) => await c.GetContestStandingsAsync(contestId, forJudge: true, participantSearch: participant));
