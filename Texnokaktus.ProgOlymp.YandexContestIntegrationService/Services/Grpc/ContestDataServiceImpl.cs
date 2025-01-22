@@ -2,6 +2,7 @@ using System.Globalization;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Entities;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Repositories.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
@@ -26,8 +27,7 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageR
 {
     public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
     {
-        if (await contestStageRepository.GetAsync(request.ContestId) is not { YandexContestId: { } yandexContestId })
-            return new();
+        var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
 
         var contestDescription = await contestClient.GetContestDescriptionAsync(yandexContestId);
 
@@ -39,7 +39,10 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageR
 
     public override async Task<GetProblemsResponse> GetProblems(GetProblemsRequest request, ServerCallContext context)
     {
-        var contestProblems = await contestClient.GetContestProblemsAsync(request.ContestId);
+        var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
+
+        var contestProblems = await contestClient.GetContestProblemsAsync(yandexContestId);
+
         return new()
         {
             Problems = { contestProblems.Problems.Select(problem => problem.MapContestProblem()) }
@@ -48,8 +51,7 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageR
 
     public override async Task<GetStandingsResponse> GetStandings(GetStandingsRequest request, ServerCallContext context)
     {
-        if (await contestStageRepository.GetAsync(request.ContestId) is not { YandexContestId: { } yandexContestId })
-            return new();
+        var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
 
         var contestStandings = await contestClient.GetContestStandingsAsync(yandexContestId,
                                                                             forJudge: true,
@@ -64,11 +66,8 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageR
 
     public override async Task<ParticipantStatusResponse> GetParticipantStatus(ParticipantStatusRequest request, ServerCallContext context)
     {
-        if (await contestUserRepository.GetAsync(request.ContestId, request.ParticipantLogin) is not { } contestUser)
-            return new();
-
-        if (contestUser.ContestStage.YandexContestId is not { } yandexContestId)
-            return new();
+        var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
+        var contestUser = await GetContestParticipantAsync(request.ContestId, request.ParticipantLogin);
 
         var participantStatus = await contestClient.GetParticipantStatusAsync(yandexContestId, contestUser.ContestUserId);
 
@@ -77,6 +76,16 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageR
             Result = participantStatus.MapParticipationStatus()
         };
     }
+
+    private async Task<long> GetYandexContestIdAsync(int contestId)
+    {
+        var contestStage = await contestStageRepository.GetAsync(contestId);
+        return contestStage?.YandexContestId ?? throw new RpcException(new(StatusCode.NotFound, "Contest not found"));
+    }
+
+    private async Task<ContestUser> GetContestParticipantAsync(int contestId, string participantLogin) =>
+        await contestUserRepository.GetAsync(contestId, participantLogin)
+     ?? throw new RpcException(new(StatusCode.NotFound, "Contest participant not found"));
 }
 
 file static class MappingExtensions
