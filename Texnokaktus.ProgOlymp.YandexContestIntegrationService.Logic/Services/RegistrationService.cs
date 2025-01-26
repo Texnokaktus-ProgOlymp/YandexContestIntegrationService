@@ -6,11 +6,11 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Service
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 
-internal class RegistrationService(IUnitOfWork unitOfWork, IContestClient contestClient) : IRegistrationService
+internal class RegistrationService(IContestStageService contestStageService, IUnitOfWork unitOfWork, IContestClient contestClient) : IRegistrationService
 {
     public async Task<string> RegisterUserAsync(int contestStageId, string yandexIdLogin)
     {
-        if (await unitOfWork.ContestStageRepository.GetAsync(contestStageId) is not { } contestStage)
+        if (await contestStageService.GetContestStageAsync(contestStageId) is not { } contestStage)
             throw new ContestStageDoesNotExistException(contestStageId);
 
         if (contestStage.YandexContestId is not { } yandexContestId)
@@ -34,12 +34,11 @@ internal class RegistrationService(IUnitOfWork unitOfWork, IContestClient contes
 
     public async Task UnregisterUserAsync(int contestStageId, string yandexIdLogin)
     {
-        if (await unitOfWork.ContestStageRepository.GetAsync(contestStageId) is not { } contestStage)
+        if (await contestStageService.GetContestStageAsync(contestStageId) is not { } contestStage)
             throw new ContestStageDoesNotExistException(contestStageId);
 
         if (contestStage.YandexContestId is not { } yandexContestId)
             throw new YandexContestIdNotSetException(contestStageId);
-
 
         var contestUser = await unitOfWork.ContestUserRepository.GetAsync(contestStageId, yandexIdLogin)
                        ?? throw new UserIsNotRegisteredException(contestStageId, yandexIdLogin);

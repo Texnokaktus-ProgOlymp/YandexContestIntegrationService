@@ -4,6 +4,7 @@ using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Entities;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Repositories.Abstractions;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
 using CompilerLimit = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.CompilerLimit;
@@ -23,7 +24,7 @@ using UpsolvingAllowance = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexCon
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class ContestDataServiceImpl(IContestClient contestClient, IContestStageRepository contestStageRepository, IContestUserRepository contestUserRepository) : ContestDataService.ContestDataServiceBase
+public class ContestDataServiceImpl(IContestClient contestClient, IContestStageService contestStageService, IContestUserRepository contestUserRepository) : ContestDataService.ContestDataServiceBase
 {
     public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
     {
@@ -79,7 +80,7 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageR
 
     private async Task<long> GetYandexContestIdAsync(int contestId)
     {
-        var contestStage = await contestStageRepository.GetAsync(contestId);
+        var contestStage = await contestStageService.GetContestStageAsync(contestId);
         return contestStage?.YandexContestId ?? throw new RpcException(new(StatusCode.NotFound, "Contest not found"));
     }
 
