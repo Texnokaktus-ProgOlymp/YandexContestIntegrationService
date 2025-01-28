@@ -2,6 +2,6 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.A
 
 public interface IRegistrationService
 {
-    Task<string> RegisterUserAsync(int contestStageId, string yandexIdLogin);
+    Task RegisterUserAsync(int contestStageId, string yandexIdLogin, string? participantDisplayName);
     Task UnregisterUserAsync(int contestStageId, string yandexIdLogin);
 }

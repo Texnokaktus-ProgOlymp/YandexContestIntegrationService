@@ -1,4 +1,4 @@
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Services.Abstractions;
+using Microsoft.Extensions.Logging;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Exceptions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Exceptions;
@@ -6,25 +6,29 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Service
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 
-internal class RegistrationService(IUnitOfWork unitOfWork, IContestClient contestClient) : IRegistrationService
+internal class RegistrationService(IContestStageService contestStageService,
+                                   IParticipantService participantService,
+                                   IContestClient contestClient,
+                                   ILogger<RegistrationService> logger) : IRegistrationService
 {
-    public async Task<string> RegisterUserAsync(int contestStageId, string yandexIdLogin)
+    public async Task RegisterUserAsync(int contestStageId, string yandexIdLogin, string? participantDisplayName)
     {
-        if (await unitOfWork.ContestStageRepository.GetAsync(contestStageId) is not { } contestStage)
+        if (await contestStageService.GetContestStageAsync(contestStageId) is not { } contestStage)
             throw new ContestStageDoesNotExistException(contestStageId);
 
         if (contestStage.YandexContestId is not { } yandexContestId)
             throw new YandexContestIdNotSetException(contestStageId);
 
-        if (await unitOfWork.ContestUserRepository.IsExistsAsync(contestStageId, yandexIdLogin))
+        if (await participantService.GetContestUserIdAsync(contestStageId, yandexIdLogin) is not null)
             throw new UserIsAlreadyRegisteredException(contestStageId, yandexIdLogin);
 
         try
         {
             var contestUserId = await contestClient.RegisterParticipantByLoginAsync(yandexContestId, yandexIdLogin);
-            unitOfWork.ContestUserRepository.Add(new(contestStage.Id, yandexIdLogin, contestUserId));
-            await unitOfWork.SaveChangesAsync();
-            return $"https://contest.yandex.ru/contest/{yandexContestId}/enter/";
+            if (participantDisplayName is not null)
+                await SetParticipantDisplayNameAsync(yandexContestId, contestUserId, participantDisplayName);
+
+            await participantService.AddContestParticipantAsync(contestStageId, yandexIdLogin, contestUserId);
         }
         catch (InvalidUserException e)
         {
@@ -34,18 +38,28 @@ internal class RegistrationService(IUnitOfWork unitOfWork, IContestClient contes
 
     public async Task UnregisterUserAsync(int contestStageId, string yandexIdLogin)
     {
-        if (await unitOfWork.ContestStageRepository.GetAsync(contestStageId) is not { } contestStage)
+        if (await contestStageService.GetContestStageAsync(contestStageId) is not { } contestStage)
             throw new ContestStageDoesNotExistException(contestStageId);
 
         if (contestStage.YandexContestId is not { } yandexContestId)
             throw new YandexContestIdNotSetException(contestStageId);
 
+        var contestUserId = await participantService.GetContestUserIdAsync(contestStageId, yandexIdLogin)
+                         ?? throw new UserIsNotRegisteredException(contestStageId, yandexIdLogin);
 
-        var contestUser = await unitOfWork.ContestUserRepository.GetAsync(contestStageId, yandexIdLogin)
-                       ?? throw new UserIsNotRegisteredException(contestStageId, yandexIdLogin);
+        await contestClient.UnregisterParticipantAsync(yandexContestId, contestUserId);
+        await participantService.DeleteContestParticipantAsync(contestStageId, yandexIdLogin);
+    }
 
-        await contestClient.UnregisterParticipantAsync(yandexContestId, contestUser.ContestUserId);
-        
-        await unitOfWork.ContestUserRepository.DeleteAsync(new(contestStageId, yandexIdLogin));
+    private async Task SetParticipantDisplayNameAsync(long yandexContestId, long yandexParticipantId, string displayName)
+    {
+        try
+        {
+            await contestClient.UpdateParticipantAsync(yandexContestId, yandexParticipantId, new(displayName));
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Unable to update participant's display name");
+        }
     }
 }

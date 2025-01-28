@@ -1,6 +1,6 @@
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Exceptions;
 
-public class YandexAuthenticationException : Exception
+public class YandexAuthenticationException : YandexApiException
 {
     public YandexAuthenticationException(string? message) : base(message)
     {
