@@ -13,7 +13,7 @@ public class RegistrationServiceImpl(IRegistrationService registrationService, I
         {
             return new()
             {
-                ContestUrl = await registrationService.RegisterUserAsync(request.ContestStageId, request.YandexIdLogin)
+                ContestUrl = await registrationService.RegisterUserAsync(request.ContestStageId, request.YandexIdLogin, request.DisplayName)
             };
         }
         catch (RpcApplicationException e)

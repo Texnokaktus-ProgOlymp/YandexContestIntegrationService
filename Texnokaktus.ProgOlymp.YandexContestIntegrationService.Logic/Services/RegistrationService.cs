@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Exceptions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Exceptions;
@@ -7,9 +8,10 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 
 internal class RegistrationService(IContestStageService contestStageService,
                                    IParticipantService participantService,
-                                   IContestClient contestClient) : IRegistrationService
+                                   IContestClient contestClient,
+                                   ILogger<RegistrationService> logger) : IRegistrationService
 {
-    public async Task<string> RegisterUserAsync(int contestStageId, string yandexIdLogin)
+    public async Task<string> RegisterUserAsync(int contestStageId, string yandexIdLogin, string? participantDisplayName)
     {
         if (await contestStageService.GetContestStageAsync(contestStageId) is not { } contestStage)
             throw new ContestStageDoesNotExistException(contestStageId);
@@ -23,6 +25,8 @@ internal class RegistrationService(IContestStageService contestStageService,
         try
         {
             var contestUserId = await contestClient.RegisterParticipantByLoginAsync(yandexContestId, yandexIdLogin);
+            if (participantDisplayName is not null)
+                await SetParticipantDisplayNameAsync(yandexContestId, contestUserId, participantDisplayName);
 
             await participantService.AddContestParticipantAsync(contestStageId, yandexIdLogin, contestUserId);
 
@@ -47,5 +51,17 @@ internal class RegistrationService(IContestStageService contestStageService,
 
         await contestClient.UnregisterParticipantAsync(yandexContestId, contestUserId);
         await participantService.DeleteContestParticipantAsync(contestStageId, yandexIdLogin);
+    }
+
+    private async Task SetParticipantDisplayNameAsync(long yandexContestId, long yandexParticipantId, string displayName)
+    {
+        try
+        {
+            await contestClient.UpdateParticipantAsync(yandexContestId, yandexParticipantId, new(displayName));
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Unable to update participant's display name");
+        }
     }
 }
