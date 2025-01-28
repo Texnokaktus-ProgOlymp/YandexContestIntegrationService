@@ -2,8 +2,6 @@ using System.Globalization;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Entities;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Repositories.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
@@ -24,7 +22,7 @@ using UpsolvingAllowance = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexCon
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class ContestDataServiceImpl(IContestClient contestClient, IContestStageService contestStageService, IContestUserRepository contestUserRepository) : ContestDataService.ContestDataServiceBase
+public class ContestDataServiceImpl(IContestClient contestClient, IContestStageService contestStageService, IParticipantService participantService) : ContestDataService.ContestDataServiceBase
 {
     public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
     {
@@ -68,9 +66,9 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageS
     public override async Task<ParticipantStatusResponse> GetParticipantStatus(ParticipantStatusRequest request, ServerCallContext context)
     {
         var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
-        var contestUser = await GetContestParticipantAsync(request.ContestId, request.ParticipantLogin);
+        var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantLogin);
 
-        var participantStatus = await contestClient.GetParticipantStatusAsync(yandexContestId, contestUser.ContestUserId);
+        var participantStatus = await contestClient.GetParticipantStatusAsync(yandexContestId, contestUserId);
 
         return new()
         {
@@ -84,8 +82,8 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageS
         return contestStage?.YandexContestId ?? throw new RpcException(new(StatusCode.NotFound, "Contest not found"));
     }
 
-    private async Task<ContestUser> GetContestParticipantAsync(int contestId, string participantLogin) =>
-        await contestUserRepository.GetAsync(contestId, participantLogin)
+    private async Task<long> GetContestParticipantAsync(int contestId, string participantLogin) =>
+        await participantService.GetContestUserIdAsync(contestId, participantLogin)
      ?? throw new RpcException(new(StatusCode.NotFound, "Contest participant not found"));
 }
 
