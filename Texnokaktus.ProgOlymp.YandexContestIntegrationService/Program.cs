@@ -1,15 +1,11 @@
-using System.Diagnostics;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using Serilog;
 using StackExchange.Redis;
 using Texnokaktus.ProgOlymp.Identity;
+using Texnokaktus.ProgOlymp.OpenTelemetry;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Consumers;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
@@ -69,23 +65,7 @@ builder.Services.AddGrpcHealthChecks().AddCheck("Default", () => HealthCheckResu
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
-builder.Services
-       .AddOpenTelemetry()
-       .ConfigureResource(resourceBuilder => resourceBuilder.AddService(Process.GetCurrentProcess().ProcessName))
-       .WithTracing(tracerProviderBuilder => tracerProviderBuilder.AddAspNetCoreInstrumentation()
-                                                                  .AddHttpClientInstrumentation()
-                                                                  .AddRedisInstrumentation()
-                                                                  .AddSqlClientInstrumentation()
-                                                                  .AddGrpcClientInstrumentation()
-                                                                  .AddOtlpExporter(options =>
-                                                                   {
-                                                                       options.Endpoint = new(builder.Configuration.GetConnectionString("OtlpReceiver")!);
-                                                                       options.Protocol = OtlpExportProtocol.Grpc;
-                                                                   }))
-       .WithMetrics(meterProviderBuilder => meterProviderBuilder.AddAspNetCoreInstrumentation()
-                                                                .AddSqlClientInstrumentation()
-                                                                .AddHttpClientInstrumentation()
-                                                                .AddPrometheusExporter());
+builder.Services.AddTexnokaktusOpenTelemetry(builder.Configuration, null, null);
 
 var app = builder.Build();
 
