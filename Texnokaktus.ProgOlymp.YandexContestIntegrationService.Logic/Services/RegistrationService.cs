@@ -1,4 +1,3 @@
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Services.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Exceptions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Exceptions;
@@ -6,7 +5,9 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Service
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 
-internal class RegistrationService(IContestStageService contestStageService, IUnitOfWork unitOfWork, IContestClient contestClient) : IRegistrationService
+internal class RegistrationService(IContestStageService contestStageService,
+                                   IParticipantService participantService,
+                                   IContestClient contestClient) : IRegistrationService
 {
     public async Task<string> RegisterUserAsync(int contestStageId, string yandexIdLogin)
     {
@@ -16,14 +17,15 @@ internal class RegistrationService(IContestStageService contestStageService, IUn
         if (contestStage.YandexContestId is not { } yandexContestId)
             throw new YandexContestIdNotSetException(contestStageId);
 
-        if (await unitOfWork.ContestUserRepository.IsExistsAsync(contestStageId, yandexIdLogin))
+        if (await participantService.GetContestUserIdAsync(contestStageId, yandexIdLogin) is not null)
             throw new UserIsAlreadyRegisteredException(contestStageId, yandexIdLogin);
 
         try
         {
             var contestUserId = await contestClient.RegisterParticipantByLoginAsync(yandexContestId, yandexIdLogin);
-            unitOfWork.ContestUserRepository.Add(new(contestStage.Id, yandexIdLogin, contestUserId));
-            await unitOfWork.SaveChangesAsync();
+
+            await participantService.AddContestParticipantAsync(contestStageId, yandexIdLogin, contestUserId);
+
             return $"https://contest.yandex.ru/contest/{yandexContestId}/enter/";
         }
         catch (InvalidUserException e)
@@ -40,11 +42,10 @@ internal class RegistrationService(IContestStageService contestStageService, IUn
         if (contestStage.YandexContestId is not { } yandexContestId)
             throw new YandexContestIdNotSetException(contestStageId);
 
-        var contestUser = await unitOfWork.ContestUserRepository.GetAsync(contestStageId, yandexIdLogin)
-                       ?? throw new UserIsNotRegisteredException(contestStageId, yandexIdLogin);
+        var contestUserId = await participantService.GetContestUserIdAsync(contestStageId, yandexIdLogin)
+                         ?? throw new UserIsNotRegisteredException(contestStageId, yandexIdLogin);
 
-        await contestClient.UnregisterParticipantAsync(yandexContestId, contestUser.ContestUserId);
-        
-        await unitOfWork.ContestUserRepository.DeleteAsync(new(contestStageId, yandexIdLogin));
+        await contestClient.UnregisterParticipantAsync(yandexContestId, contestUserId);
+        await participantService.DeleteContestParticipantAsync(contestStageId, yandexIdLogin);
     }
 }
