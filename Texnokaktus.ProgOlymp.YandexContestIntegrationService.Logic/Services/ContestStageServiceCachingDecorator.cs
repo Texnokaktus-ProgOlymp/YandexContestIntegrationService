@@ -11,9 +11,17 @@ internal class ContestStageServiceCachingDecorator(IContestStageService service,
     public Task<ContestStage?> GetContestStageAsync(int id) =>
         cache.GetOrCreateAsync(GetCacheKey(id), _ => service.GetContestStageAsync(id));
 
-    public Task AddContestStageAsync(ContestStage contestStage) => service.AddContestStageAsync(contestStage);
+    public async Task AddContestStageAsync(ContestStage contestStage)
+    {
+        await service.AddContestStageAsync(contestStage);
+        cache.Remove(GetCacheKey(contestStage.Id));
+    }
 
-    public Task AddContestStageAsync(int contestStageId) => service.AddContestStageAsync(contestStageId);
+    public async Task AddContestStageAsync(int contestStageId)
+    {
+        await service.AddContestStageAsync(contestStageId);
+        cache.Remove(GetCacheKey(contestStageId));
+    }
 
     public async Task SetYandexContestIdAsync(int contestStageId, long yandexContestId)
     {
