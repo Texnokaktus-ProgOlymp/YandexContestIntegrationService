@@ -6,6 +6,7 @@ public interface IContestClient
 {
     Task<long> RegisterParticipantByLoginAsync(long contestId, string login);
     Task UnregisterParticipantAsync(long contestId, long participantId);
+    Task UpdateParticipantAsync(long contestId, long participantId, UpdateParticipantRequest model);
     Task<ContestDescription> GetContestDescriptionAsync(long contestId);
     Task<ContestProblems> GetContestProblemsAsync(long contestId, string locale = "ru");
 

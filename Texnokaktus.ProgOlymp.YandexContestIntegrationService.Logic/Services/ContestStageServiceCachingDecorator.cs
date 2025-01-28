@@ -6,7 +6,7 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 
 internal class ContestStageServiceCachingDecorator(IContestStageService service, IMemoryCache cache) : IContestStageService
 {
-    public Task<IEnumerable<ContestStage>> GetContestStagesAsync() => throw new NotImplementedException();
+    public Task<IEnumerable<ContestStage>> GetContestStagesAsync() => service.GetContestStagesAsync();
 
     public Task<ContestStage?> GetContestStageAsync(int id) =>
         cache.GetOrCreateAsync(GetCacheKey(id), _ => service.GetContestStageAsync(id));
