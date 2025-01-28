@@ -11,7 +11,7 @@ internal class RegistrationService(IContestStageService contestStageService,
                                    IContestClient contestClient,
                                    ILogger<RegistrationService> logger) : IRegistrationService
 {
-    public async Task<string> RegisterUserAsync(int contestStageId, string yandexIdLogin, string? participantDisplayName)
+    public async Task RegisterUserAsync(int contestStageId, string yandexIdLogin, string? participantDisplayName)
     {
         if (await contestStageService.GetContestStageAsync(contestStageId) is not { } contestStage)
             throw new ContestStageDoesNotExistException(contestStageId);
@@ -29,8 +29,6 @@ internal class RegistrationService(IContestStageService contestStageService,
                 await SetParticipantDisplayNameAsync(yandexContestId, contestUserId, participantDisplayName);
 
             await participantService.AddContestParticipantAsync(contestStageId, yandexIdLogin, contestUserId);
-
-            return $"https://contest.yandex.ru/contest/{yandexContestId}/enter/";
         }
         catch (InvalidUserException e)
         {

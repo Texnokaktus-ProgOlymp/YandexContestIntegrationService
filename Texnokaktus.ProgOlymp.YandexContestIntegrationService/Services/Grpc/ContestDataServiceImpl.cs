@@ -24,6 +24,16 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
 public class ContestDataServiceImpl(IContestClient contestClient, IContestStageService contestStageService, IParticipantService participantService) : ContestDataService.ContestDataServiceBase
 {
+    public override async Task<GetContestUrlResponse> GetContestUrl(GetContestUrlRequest request, ServerCallContext context)
+    {
+        var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
+
+        return new()
+        {
+            ContestUrl = $"https://contest.yandex.ru/contest/{yandexContestId}/enter/"
+        };
+    }
+
     public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
     {
         var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
