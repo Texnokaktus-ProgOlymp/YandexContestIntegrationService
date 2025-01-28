@@ -30,7 +30,7 @@ internal class ContestClient(IRestClient client) : IContestClient
         client.ExecuteAndThrowAsync("contests/{contestId}/participants/{participantId}",
                                     restRequest => restRequest.AddUrlSegment("contestId", contestId)
                                                               .AddUrlSegment("participantId", participantId),
-                                    Method.Patch);
+                                    Method.Delete);
 
     public Task UpdateParticipantAsync(long contestId, long participantId, UpdateParticipantRequest model) =>
         client.ExecuteAndThrowAsync("contests/{contestId}/participants/{participantId}",
