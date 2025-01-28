@@ -3,7 +3,7 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstr
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 
-public class ParticipantService(IContestUserRepository contestUserRepository) : IParticipantService
+internal class ParticipantService(IContestUserRepository contestUserRepository) : IParticipantService
 {
     public async Task<long?> GetContestUserIdAsync(int contestStageId, string participantLogin)
     {

@@ -30,6 +30,7 @@ builder.Services
 var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(builder.Configuration.GetConnectionString("DefaultRedis")!);
 builder.Services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
 builder.Services.AddStackExchangeRedisCache(options => options.ConnectionMultiplexerFactory = () => Task.FromResult<IConnectionMultiplexer>(connectionMultiplexer));
+builder.Services.AddMemoryCache();
 
 builder.Services.AddControllersWithViews();
 

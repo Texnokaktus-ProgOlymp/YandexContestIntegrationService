@@ -19,4 +19,8 @@
       <Compile Remove="Services\Abstractions\IApplicationService.cs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Scrutor" Version="6.0.1" />
+    </ItemGroup>
+
 </Project>
