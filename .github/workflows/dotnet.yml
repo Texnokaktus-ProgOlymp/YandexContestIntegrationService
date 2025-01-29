@@ -32,10 +32,14 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
   docker:
-    
+
     needs: build
     runs-on: ubuntu-latest
-    
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: yandex-contest-integration-service
+
     steps:
       - name: Version
         id: get-version
