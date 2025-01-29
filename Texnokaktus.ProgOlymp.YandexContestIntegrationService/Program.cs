@@ -12,7 +12,6 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,10 +83,6 @@ else
 }
 
 app.MapGrpcHealthChecksService();
-
-app.MapGet("api/contests/{contestId:long}/problems", async(long contestId, IContestClient c) => await c.GetContestProblemsAsync(contestId));
-app.MapGet("api/contests/{contestId:long}/standings", async (long contestId, string? participant, IContestClient c) => await c.GetContestStandingsAsync(contestId, forJudge: true, participantSearch: participant));
-app.MapGet("api/contests/{contestId:long}/participants/{participantId:long}", async (long contestId, long participantId, IContestClient c) => await c.GetParticipantStatusAsync(contestId, participantId));
 
 app.UseStatusCodePagesWithReExecute("/home/error/{0}");
 
