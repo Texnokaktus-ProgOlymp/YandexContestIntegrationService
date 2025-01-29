@@ -65,7 +65,7 @@ builder.Services.AddGrpcHealthChecks().AddCheck("Default", () => HealthCheckResu
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
-builder.Services.AddTexnokaktusOpenTelemetry(builder.Configuration, null, null);
+builder.Services.AddTexnokaktusOpenTelemetry(builder.Configuration, "YandexContestIntegrationService", null, null);
 
 var app = builder.Build();
 
