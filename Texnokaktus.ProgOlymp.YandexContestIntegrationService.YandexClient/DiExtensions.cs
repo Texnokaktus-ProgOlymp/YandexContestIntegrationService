@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.DependencyInjection;
 using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Authenticators.OAuth2;
+using RestSharp.Serializers.Json;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
 
@@ -26,6 +29,13 @@ public static class DiExtensions
                  {
                      var authenticator = provider.GetRequiredService<IAuthenticator>();
                      return new RestClient("https://api.contest.yandex.net/api/public/v2/",
-                                           options => options.Authenticator = authenticator);
+                                           options => options.Authenticator = authenticator,
+                                           configureSerialization: config => config.UseSystemTextJson(new(JsonSerializerDefaults.Web)
+                                               {
+                                                   Converters =
+                                                   {
+                                                       new JsonStringEnumConverter()
+                                                   }
+                                               }));
                  });
 }

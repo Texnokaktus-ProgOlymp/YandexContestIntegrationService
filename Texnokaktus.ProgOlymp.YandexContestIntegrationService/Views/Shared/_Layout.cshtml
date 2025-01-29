@@ -17,10 +17,13 @@
             <div class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
                 <ul class="navbar-nav flex-grow-1">
                     <li>
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Applications" asp-action="Index">Applications</a>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Registrations" asp-action="Index">Registrations</a>
                     </li>
                     <li>
                         <a class="nav-link text-dark" asp-area="" asp-controller="ContestStages" asp-action="Index">Contest stages</a>
+                    </li>
+                    <li>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Yandex" asp-action="Index">Yandex Authentication</a>
                     </li>
                     @if (User.Identity?.IsAuthenticated is true)
                     {

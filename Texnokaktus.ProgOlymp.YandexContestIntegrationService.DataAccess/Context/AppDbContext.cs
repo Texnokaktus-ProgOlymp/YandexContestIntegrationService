@@ -5,25 +5,11 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Conte
 
 public class AppDbContext(DbContextOptions options) : DbContext(options)
 {
-     public DbSet<ContestStageApplication> ContestStageApplications => Set<ContestStageApplication>();
      public DbSet<ContestStage> ContestStages => Set<ContestStage>();
+     public DbSet<ContestUser> ContestUsers => Set<ContestUser>();
 
      protected override void OnModelCreating(ModelBuilder modelBuilder)
      {
-          modelBuilder.Entity<ContestStageApplication>(builder =>
-          {
-               builder.HasKey(application => application.Id);
-               builder.Property(application => application.Id).UseIdentityColumn();
-
-               builder.Property(application => application.CreatedUtc)
-                      .HasConversion(time => time.ToUniversalTime(),
-                                     time => DateTime.SpecifyKind(time, DateTimeKind.Utc));
-
-               builder.HasOne(application => application.ContestStage)
-                      .WithMany()
-                      .HasForeignKey(application => application.ContestStageId);
-          });
-
           modelBuilder.Entity<ContestStage>(builder =>
           {
                builder.HasKey(stage => stage.Id);
@@ -39,7 +25,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
                builder.HasKey(user => user.Id);
                builder.Property(user => user.Id).UseIdentityColumn();
 
-               builder.HasAlternateKey(user => new { user.ContestStageId, user.ContestUserId });
+               builder.HasAlternateKey(user => new { user.ContestStageId, user.YandexIdLogin });
 
                builder.HasOne(user => user.ContestStage)
                       .WithMany()
