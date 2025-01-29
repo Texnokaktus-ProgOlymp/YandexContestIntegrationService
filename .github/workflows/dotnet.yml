@@ -41,6 +41,10 @@ jobs:
       IMAGE_NAME: yandex-contest-integration-service
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
       - name: Version
         id: get-version
         run: echo "version=1.${{ github.run_number }}.${{ github.run_attempt }}" >> $GITHUB_OUTPUT
