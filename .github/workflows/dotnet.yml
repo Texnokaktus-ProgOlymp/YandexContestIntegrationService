@@ -123,4 +123,4 @@ jobs:
         run: sudo docker run -d --env-file ~/env/${{ env.CONTAINER_NAME }}.env -p ${{ env.HTTP_PORT }}:8080 -p ${{ env.GRPC_PORT }}:8081 --name ${{ env.CONTAINER_NAME }} --hostname ${{ env.CONTAINER_NAME }} --restart unless-stopped ${{ env.IMAGE }}
         
       - name: Delete old image
-        run: sudo docker image rm ${{ steps.old-image.outputs }} || true
+        run: sudo docker image rm ${{ steps.old-image.outputs.image }} || true
