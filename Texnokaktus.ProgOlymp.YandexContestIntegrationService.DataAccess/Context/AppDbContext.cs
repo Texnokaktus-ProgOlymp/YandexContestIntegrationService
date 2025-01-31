@@ -15,9 +15,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
                builder.HasKey(stage => stage.Id);
                builder.Property(stage => stage.Id).ValueGeneratedNever();
 
-               builder.HasIndex(stage => stage.YandexContestId)
-                      .HasFilter($"[{nameof(ContestStage.YandexContestId)}] IS NOT NULL")
-                      .IsUnique();
+               builder.HasAlternateKey(stage => stage.YandexContestId);
           });
 
           modelBuilder.Entity<ContestUser>(builder =>
