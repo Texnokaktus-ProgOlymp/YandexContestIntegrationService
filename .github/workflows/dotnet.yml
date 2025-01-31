@@ -99,7 +99,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     
     env:
-      IMsudoAGE: ${{ needs.docker.outputs.name }}@${{ needs.docker.outputs.hash }}
+      IMAGE: ${{ needs.docker.outputs.name }}@${{ needs.docker.outputs.hash }}
       CONTAINER_NAME: yandex-contest-integration-service
       HTTP_PORT: 5001
       GRPC_PORT: 5002
