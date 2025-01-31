@@ -1,5 +1,6 @@
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
@@ -65,6 +66,10 @@ builder.Services.AddGrpcHealthChecks().AddCheck("Default", () => HealthCheckResu
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddTexnokaktusOpenTelemetry(builder.Configuration, "YandexContestIntegrationService", null, null);
+
+builder.Services
+       .AddDataProtection(options => options.ApplicationDiscriminator = Assembly.GetEntryAssembly()?.GetName().Name)
+       .PersistKeysToStackExchangeRedis(connectionMultiplexer);
 
 var app = builder.Build();
 
