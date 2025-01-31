@@ -64,7 +64,8 @@ builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
 builder.Services
        .AddGrpcHealthChecks()
-       .AddCheck<AuthenticationHealthCheck>(nameof(AuthenticationHealthCheck));
+       .AddCheck<AuthenticationHealthCheck>(nameof(AuthenticationHealthCheck))
+       .AddDatabaseHealthChecks();
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
