@@ -5,6 +5,7 @@ using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Authenticators.OAuth2;
 using RestSharp.Serializers.Json;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
 
@@ -25,17 +26,17 @@ public static class DiExtensions
                                     ?? throw new("No token");
                      return new OAuth2AuthorizationRequestHeaderAuthenticator(accessToken);
                  })
-                .AddScoped<IRestClient>(provider =>
-                 {
-                     var authenticator = provider.GetRequiredService<IAuthenticator>();
-                     return new RestClient("https://api.contest.yandex.net/api/public/v2/",
-                                           options => options.Authenticator = authenticator,
-                                           configureSerialization: config => config.UseSystemTextJson(new(JsonSerializerDefaults.Web)
-                                               {
-                                                   Converters =
-                                                   {
-                                                       new JsonStringEnumConverter()
-                                                   }
-                                               }));
-                 });
+                .AddKeyedScoped<IRestClient>(ClientType.YandexContest,
+                                             (provider, _) =>
+                                                 new RestClient("https://api.contest.yandex.net/api/public/v2/",
+                                                                options => options.Authenticator = provider.GetRequiredService<IAuthenticator>(),
+                                                                configureSerialization: config =>
+                                                                    config.UseSystemTextJson(new(JsonSerializerDefaults.Web)
+                                                                    {
+                                                                        Converters =
+                                                                        {
+                                                                            new JsonStringEnumConverter()
+                                                                        }
+                                                                    })))
+                .AddKeyedScoped<IRestClient>(ClientType.YandexOAuth, (_, _) => new RestClient("https://oauth.yandex.ru"));
 }

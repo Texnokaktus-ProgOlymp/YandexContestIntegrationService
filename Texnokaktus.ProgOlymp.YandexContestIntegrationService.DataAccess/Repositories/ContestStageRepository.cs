@@ -14,7 +14,7 @@ internal class ContestStageRepository(AppDbContext context) : IContestStageRepos
     public async Task<IList<ContestStage>> GetAllAsync() =>
         await context.ContestStages.ToListAsync();
 
-    public void Add(int contestStageId, long? yandexContestId)
+    public void Add(int contestStageId, long yandexContestId)
     {
         var entity = new ContestStage
         {

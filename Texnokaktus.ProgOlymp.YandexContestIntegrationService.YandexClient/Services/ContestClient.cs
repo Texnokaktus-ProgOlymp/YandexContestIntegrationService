@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.Extensions.DependencyInjection;
 using RestSharp;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Exceptions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
@@ -6,7 +7,7 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Service
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services;
 
-internal class ContestClient(IRestClient client) : IContestClient
+internal class ContestClient([FromKeyedServices(ClientType.YandexContest)] IRestClient client) : IContestClient
 {
     public async Task<long> RegisterParticipantByLoginAsync(long contestId, string login)
     {
