@@ -1,3 +1,4 @@
+using System.Reflection;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
@@ -100,6 +101,7 @@ app.UseAuthorization();
 
 app.MapGrpcService<ContestDataServiceImpl>();
 app.MapGrpcService<RegistrationServiceImpl>();
+app.MapGrpcService<YandexAuthenticationServiceImpl>();
 
 app.MapControllerRoute(name: "default",
                        pattern: "{controller=Home}/{action=Index}/{id?}");
