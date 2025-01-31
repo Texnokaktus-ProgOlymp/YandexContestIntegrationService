@@ -66,18 +66,18 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Set image name
-        id: get-image-name
-        run: echo "image-name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}" >> $GITHUB_OUTPUT
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ steps.get-image-name.outputs.image-name }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags:
             type=semver,pattern={{version}},value=v${{ steps.get-version.outputs.version }}
+
+      - name: Get image name
+        id: get-image-name
+        run: echo "image-name=${{ steps.meta.outputs.tags }}" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         id: build
@@ -99,7 +99,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     
     env:
-      IMAGE: ${{ needs.docker.outputs.name }}@${{ needs.docker.outputs.hash }}
+      IMAGE: ${{ needs.docker.outputs.name }}
       CONTAINER_NAME: yandex-contest-integration-service
       HTTP_PORT: 5001
       GRPC_PORT: 5002
