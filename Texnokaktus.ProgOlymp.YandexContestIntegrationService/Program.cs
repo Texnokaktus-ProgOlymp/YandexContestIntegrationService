@@ -3,13 +3,13 @@ using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using StackExchange.Redis;
 using Texnokaktus.ProgOlymp.Identity;
 using Texnokaktus.ProgOlymp.OpenTelemetry;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Consumers;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.HealthChecks;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
@@ -62,7 +62,9 @@ builder.Services.AddSingleton(TimeProvider.System);
 
 builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
-builder.Services.AddGrpcHealthChecks().AddCheck("Default", () => HealthCheckResult.Healthy());
+builder.Services
+       .AddGrpcHealthChecks()
+       .AddCheck<AuthenticationHealthCheck>(nameof(AuthenticationHealthCheck));
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
