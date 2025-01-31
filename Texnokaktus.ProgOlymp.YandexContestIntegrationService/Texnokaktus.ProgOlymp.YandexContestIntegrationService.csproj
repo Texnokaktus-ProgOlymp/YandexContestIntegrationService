@@ -9,7 +9,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\modules\Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts.csproj" />
-        <ProjectReference Include="..\Texnokaktus.ProgOlymp.Identity\Texnokaktus.ProgOlymp.Identity.csproj" />
         <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj" />
         <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain.csproj" />
         <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj" />
