@@ -35,10 +35,15 @@ jobs:
 
     needs: build
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
 
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: yandex-contest-integration-service
+
+    outputs:
+      name: ${{ steps.get-image-name.outputs.image-name }}
+      hash: ${{ steps.build.outputs.imageid }}
 
     steps:
       - uses: actions/checkout@v4
@@ -61,16 +66,21 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Set image name
+        id: get-image-name
+        run: echo "image-name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}" >> $GITHUB_OUTPUT
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+          images: ${{ steps.get-image-name.outputs.image-name }}
           tags:
             type=semver,pattern={{version}},value=v${{ steps.get-version.outputs.version }}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -81,3 +91,35 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    
+    needs: docker
+    runs-on: cttit
+    if: github.ref == 'refs/heads/master'
+    
+    env:
+      IMsudoAGE: ${{ needs.docker.outputs.name }}@${{ needs.docker.outputs.hash }}
+      CONTAINER_NAME: yandex-contest-integration-service
+      HTTP_PORT: 5001
+      GRPC_PORT: 5002
+
+    steps:
+      - name: Get old image hash
+        id: old-image
+        run: sudo docker container inspect ${{ env.CONTAINER_NAME }} --format='{{.Image}}' | awk '{print "image="$1}' >> $GITHUB_OUTPUT
+        
+      - name: Pull new container
+        run: sudo docker pull ${{ env.IMAGE }}
+        
+      - name: Stop running container
+        run: sudo docker stop ${{ env.CONTAINER_NAME }} || true
+        
+      - name: Remove old container
+        run: sudo docker container rm ${{ env.CONTAINER_NAME }} || true
+        
+      - name: Run a new container
+        run: sudo docker run -d --env-file ~/env/${{ env.CONTAINER_NAME }}.env -p ${{ env.HTTP_PORT }}:8080 -p ${{ env.GRPC_PORT }}:8081 --name ${{ env.CONTAINER_NAME }} --hostname ${{ env.CONTAINER_NAME }} --restart unless-stopped ${{ env.IMAGE }}
+        
+      - name: Delete old image
+        run: sudo docker image rm ${{ steps.old-image.outputs }} || true
