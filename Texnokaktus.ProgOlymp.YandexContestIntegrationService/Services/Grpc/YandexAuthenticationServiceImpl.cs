@@ -17,6 +17,12 @@ public class YandexAuthenticationServiceImpl(ITokenService tokenService, IYandex
         };
     }
 
+    public override Task<GetOAuthUrlResponse> GetOAuthUrl(GetOAuthUrlRequest request, ServerCallContext context) =>
+        Task.FromResult<GetOAuthUrlResponse>(new()
+        {
+            Result = yandexAuthenticationService.GetYandexOAuthUrl(request.RedirectUrl)
+        });
+
     public override async Task<Empty> AuthenticateService(AuthenticateServiceRequest request, ServerCallContext context)
     {
         var tokenResponse = await yandexAuthenticationService.GetAccessTokenAsync(request.Code);
