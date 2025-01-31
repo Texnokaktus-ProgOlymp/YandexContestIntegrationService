@@ -66,18 +66,19 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Set image name
-        id: get-image-name
-        run: echo "image-name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}" >> $GITHUB_OUTPUT
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ steps.get-image-name.outputs.image-name }}
+          sep-tags: ','
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags:
             type=semver,pattern={{version}},value=v${{ steps.get-version.outputs.version }}
+
+      - name: Get image name
+        id: get-image-name
+        run: echo "image-name=${{ steps.meta.outputs.tags }}" | cut -d, -f1 >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         id: build
@@ -99,7 +100,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     
     env:
-      IMsudoAGE: ${{ needs.docker.outputs.name }}@${{ needs.docker.outputs.hash }}
+      IMAGE: ${{ needs.docker.outputs.name }}
       CONTAINER_NAME: yandex-contest-integration-service
       HTTP_PORT: 5001
       GRPC_PORT: 5002
@@ -107,7 +108,7 @@ jobs:
     steps:
       - name: Get old image hash
         id: old-image
-        run: sudo docker container inspect ${{ env.CONTAINER_NAME }} --format='{{.Image}}' | awk '{print "image="$1}' >> $GITHUB_OUTPUT
+        run: sudo docker container inspect ${{ env.CONTAINER_NAME }} --format='{{.Config.Image}}' | awk '{print "image="$1}' >> $GITHUB_OUTPUT
         
       - name: Pull new container
         run: sudo docker pull ${{ env.IMAGE }}
@@ -122,4 +123,4 @@ jobs:
         run: sudo docker run -d --env-file ~/env/${{ env.CONTAINER_NAME }}.env -p ${{ env.HTTP_PORT }}:8080 -p ${{ env.GRPC_PORT }}:8081 --name ${{ env.CONTAINER_NAME }} --hostname ${{ env.CONTAINER_NAME }} --restart unless-stopped ${{ env.IMAGE }}
         
       - name: Delete old image
-        run: sudo docker image rm ${{ steps.old-image.outputs }} || true
+        run: sudo docker image rm ${{ steps.old-image.outputs.image }} || true
