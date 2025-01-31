@@ -17,12 +17,6 @@ internal class ContestStageServiceCachingDecorator(IContestStageService service,
         cache.Remove(GetCacheKey(contestStage.Id));
     }
 
-    public async Task AddContestStageAsync(int contestStageId)
-    {
-        await service.AddContestStageAsync(contestStageId);
-        cache.Remove(GetCacheKey(contestStageId));
-    }
-
     public async Task SetYandexContestIdAsync(int contestStageId, long yandexContestId)
     {
         await service.SetYandexContestIdAsync(contestStageId, yandexContestId);

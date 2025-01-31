@@ -1,5 +1,4 @@
 using System.Reflection;
-using MassTransit;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +6,6 @@ using Serilog;
 using StackExchange.Redis;
 using Texnokaktus.ProgOlymp.Identity;
 using Texnokaktus.ProgOlymp.OpenTelemetry;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Consumers;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.HealthChecks;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
@@ -46,17 +44,6 @@ builder.Services
             x.AccessDeniedPath = "/accessDenied";
         });
 builder.Services.AddAuthorization();
-
-builder.Services.AddMassTransit(configurator =>
-{
-    configurator.AddConsumer<ContestStageCreatedConsumer>();
-
-    configurator.UsingRabbitMq((context, factoryConfigurator) =>
-    {
-        factoryConfigurator.Host(builder.Configuration.GetConnectionString("DefaultRabbitMq"));
-        factoryConfigurator.ConfigureEndpoints(context);
-    });
-});
 
 builder.Services.AddSingleton(TimeProvider.System);
 
@@ -103,6 +90,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGrpcService<ContestDataServiceImpl>();
+app.MapGrpcService<ContestServiceImpl>();
 app.MapGrpcService<RegistrationServiceImpl>();
 app.MapGrpcService<YandexAuthenticationServiceImpl>();
 

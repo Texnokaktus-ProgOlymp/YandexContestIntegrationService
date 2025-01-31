@@ -16,17 +16,14 @@ internal class RegistrationService(IContestStageService contestStageService,
         if (await contestStageService.GetContestStageAsync(contestStageId) is not { } contestStage)
             throw new ContestStageDoesNotExistException(contestStageId);
 
-        if (contestStage.YandexContestId is not { } yandexContestId)
-            throw new YandexContestIdNotSetException(contestStageId);
-
         if (await participantService.GetContestUserIdAsync(contestStageId, yandexIdLogin) is not null)
             throw new UserIsAlreadyRegisteredException(contestStageId, yandexIdLogin);
 
         try
         {
-            var contestUserId = await contestClient.RegisterParticipantByLoginAsync(yandexContestId, yandexIdLogin);
+            var contestUserId = await contestClient.RegisterParticipantByLoginAsync(contestStage.YandexContestId, yandexIdLogin);
             if (participantDisplayName is not null)
-                await SetParticipantDisplayNameAsync(yandexContestId, contestUserId, participantDisplayName);
+                await SetParticipantDisplayNameAsync(contestStage.YandexContestId, contestUserId, participantDisplayName);
 
             await participantService.AddContestParticipantAsync(contestStageId, yandexIdLogin, contestUserId);
         }
@@ -41,13 +38,10 @@ internal class RegistrationService(IContestStageService contestStageService,
         if (await contestStageService.GetContestStageAsync(contestStageId) is not { } contestStage)
             throw new ContestStageDoesNotExistException(contestStageId);
 
-        if (contestStage.YandexContestId is not { } yandexContestId)
-            throw new YandexContestIdNotSetException(contestStageId);
-
         var contestUserId = await participantService.GetContestUserIdAsync(contestStageId, yandexIdLogin)
                          ?? throw new UserIsNotRegisteredException(contestStageId, yandexIdLogin);
 
-        await contestClient.UnregisterParticipantAsync(yandexContestId, contestUserId);
+        await contestClient.UnregisterParticipantAsync(contestStage.YandexContestId, contestUserId);
         await participantService.DeleteContestParticipantAsync(contestStageId, yandexIdLogin);
     }
 
