@@ -108,7 +108,7 @@ jobs:
     steps:
       - name: Get old image hash
         id: old-image
-        run: sudo docker container inspect ${{ env.CONTAINER_NAME }} --format='{{.Image}}' | awk '{print "image="$1}' >> $GITHUB_OUTPUT
+        run: sudo docker container inspect ${{ env.CONTAINER_NAME }} --format='{{.Config.Image}}' | awk '{print "image="$1}' >> $GITHUB_OUTPUT
         
       - name: Pull new container
         run: sudo docker pull ${{ env.IMAGE }}
