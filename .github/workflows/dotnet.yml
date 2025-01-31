@@ -71,10 +71,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
+          sep-tags: ','
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags:
             type=semver,pattern={{version}},value=v${{ steps.get-version.outputs.version }}
-          sep-tags: ,
 
       - name: Get image name
         id: get-image-name
