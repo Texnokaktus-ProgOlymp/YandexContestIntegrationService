@@ -22,23 +22,17 @@ using UpsolvingAllowance = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexCon
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class ContestDataServiceImpl(IContestClient contestClient, IContestStageService contestStageService, IParticipantService participantService) : ContestDataService.ContestDataServiceBase
+public class ContestDataServiceImpl(IContestClient contestClient, IParticipantService participantService) : ContestDataService.ContestDataServiceBase
 {
-    public override async Task<GetContestUrlResponse> GetContestUrl(GetContestUrlRequest request, ServerCallContext context)
-    {
-        var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
-
-        return new()
+    public override Task<GetContestUrlResponse> GetContestUrl(GetContestUrlRequest request, ServerCallContext context) =>
+        Task.FromResult<GetContestUrlResponse>(new()
         {
-            ContestUrl = $"https://contest.yandex.ru/contest/{yandexContestId}/enter/"
-        };
-    }
+            ContestUrl = $"https://contest.yandex.ru/contest/{request.ContestId}/enter/"
+        });
 
     public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
     {
-        var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
-
-        var contestDescription = await contestClient.GetContestDescriptionAsync(yandexContestId);
+        var contestDescription = await contestClient.GetContestDescriptionAsync(request.ContestId);
 
         return new()
         {
@@ -48,9 +42,7 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageS
 
     public override async Task<GetProblemsResponse> GetProblems(GetProblemsRequest request, ServerCallContext context)
     {
-        var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
-
-        var contestProblems = await contestClient.GetContestProblemsAsync(yandexContestId);
+        var contestProblems = await contestClient.GetContestProblemsAsync(request.ContestId);
 
         return new()
         {
@@ -60,9 +52,7 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageS
 
     public override async Task<GetStandingsResponse> GetStandings(GetStandingsRequest request, ServerCallContext context)
     {
-        var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
-
-        var contestStandings = await contestClient.GetContestStandingsAsync(yandexContestId,
+        var contestStandings = await contestClient.GetContestStandingsAsync(request.ContestId,
                                                                             forJudge: true,
                                                                             page: request.PageIndex,
                                                                             pageSize: request.PageSize,
@@ -75,10 +65,9 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageS
 
     public override async Task<ParticipantStatusResponse> GetParticipantStatus(ParticipantStatusRequest request, ServerCallContext context)
     {
-        var yandexContestId = await GetYandexContestIdAsync(request.ContestId);
         var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantLogin);
 
-        var participantStatus = await contestClient.GetParticipantStatusAsync(yandexContestId, contestUserId);
+        var participantStatus = await contestClient.GetParticipantStatusAsync(request.ContestId, contestUserId);
 
         return new()
         {
@@ -86,13 +75,7 @@ public class ContestDataServiceImpl(IContestClient contestClient, IContestStageS
         };
     }
 
-    private async Task<long> GetYandexContestIdAsync(int contestId)
-    {
-        var contestStage = await contestStageService.GetContestStageAsync(contestId);
-        return contestStage?.YandexContestId ?? throw new RpcException(new(StatusCode.NotFound, "Contest not found"));
-    }
-
-    private async Task<long> GetContestParticipantAsync(int contestId, string participantLogin) =>
+    private async Task<long> GetContestParticipantAsync(long contestId, string participantLogin) =>
         await participantService.GetContestUserIdAsync(contestId, participantLogin)
      ?? throw new RpcException(new(StatusCode.NotFound, "Contest participant not found"));
 }

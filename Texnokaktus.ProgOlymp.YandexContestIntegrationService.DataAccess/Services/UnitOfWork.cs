@@ -5,10 +5,8 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Services.
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Services;
 
 internal class UnitOfWork(AppDbContext context,
-                          IContestStageRepository contestStageRepository,
                           IContestUserRepository contestUserRepository) : IUnitOfWork
 {
-    public IContestStageRepository ContestStageRepository { get; } = contestStageRepository;
     public IContestUserRepository ContestUserRepository { get; } = contestUserRepository;
     public async Task SaveChangesAsync() => await context.SaveChangesAsync();
 }

@@ -4,7 +4,6 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Servi
 
 public interface IUnitOfWork
 {
-    IContestStageRepository ContestStageRepository { get; }
     IContestUserRepository ContestUserRepository { get; }
     Task SaveChangesAsync();
 }

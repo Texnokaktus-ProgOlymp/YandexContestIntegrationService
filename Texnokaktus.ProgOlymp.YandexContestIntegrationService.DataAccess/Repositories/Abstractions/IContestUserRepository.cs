@@ -5,9 +5,9 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Repos
 
 public interface IContestUserRepository
 {
-    Task<bool> IsExistsAsync(int contestStageId, string yandexIdLogin);
+    Task<bool> IsExistsAsync(long contestStageId, string yandexIdLogin);
     void Add(ContestUserInsertModel model);
     Task DeleteAsync(ContestUserDeleteModel model);
-    Task<ContestUser?> GetAsync(int contestStageId, string yandexIdLogin);
+    Task<ContestUser?> GetAsync(long contestStageId, string yandexIdLogin);
     Task<IList<ContestUser>> GetAllAsync();
 }
