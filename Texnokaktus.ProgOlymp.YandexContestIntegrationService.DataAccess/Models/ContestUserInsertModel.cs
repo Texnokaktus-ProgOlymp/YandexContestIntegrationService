@@ -1,3 +1,3 @@
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Models;
 
-public record ContestUserInsertModel(int ContestStageId, string YandexIdLogin, long ContestUserId);
+public record ContestUserInsertModel(long ContestStageId, string YandexIdLogin, long ContestUserId);

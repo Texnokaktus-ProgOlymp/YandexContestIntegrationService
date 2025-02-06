@@ -8,7 +8,7 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Repos
 
 internal class ContestUserRepository(AppDbContext context) : IContestUserRepository
 {
-    public async Task<bool> IsExistsAsync(int contestStageId, string yandexIdLogin) =>
+    public async Task<bool> IsExistsAsync(long contestStageId, string yandexIdLogin) =>
         await context.ContestUsers
                      .AnyAsync(contestUser => contestUser.ContestStageId == contestStageId
                                            && contestUser.YandexIdLogin == yandexIdLogin);
@@ -30,10 +30,9 @@ internal class ContestUserRepository(AppDbContext context) : IContestUserReposit
                                         && contestUser.YandexIdLogin == model.YandexIdLogin)
                      .ExecuteDeleteAsync();
 
-    public async Task<ContestUser?> GetAsync(int contestStageId, string yandexIdLogin) =>
+    public async Task<ContestUser?> GetAsync(long contestStageId, string yandexIdLogin) =>
         await context.ContestUsers
                      .AsNoTracking()
-                     .Include(contestUser => contestUser.ContestStage)
                      .Where(user => user.ContestStageId == contestStageId
                                  && user.YandexIdLogin == yandexIdLogin)
                      .FirstOrDefaultAsync();
@@ -41,6 +40,5 @@ internal class ContestUserRepository(AppDbContext context) : IContestUserReposit
     public async Task<IList<ContestUser>> GetAllAsync() =>
         await context.ContestUsers
                      .AsNoTracking()
-                     .Include(contestUser => contestUser.ContestStage)
                      .ToListAsync();
 }

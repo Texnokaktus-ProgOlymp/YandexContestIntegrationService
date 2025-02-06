@@ -3,7 +3,7 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.A
 
 public interface IParticipantService
 {
-    Task<long?> GetContestUserIdAsync(int contestStageId, string participantLogin);
-    Task AddContestParticipantAsync(int contestStageId, string yandexIdLogin, long contestUserId);
-    Task DeleteContestParticipantAsync(int contestStageId, string yandexIdLogin);
+    Task<long?> GetContestUserIdAsync(long contestStageId, string participantLogin);
+    Task AddContestParticipantAsync(long contestStageId, string yandexIdLogin, long contestUserId);
+    Task DeleteContestParticipantAsync(long contestStageId, string yandexIdLogin);
 }
