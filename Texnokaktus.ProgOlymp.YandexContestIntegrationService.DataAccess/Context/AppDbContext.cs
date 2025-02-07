@@ -11,10 +11,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
      {
           modelBuilder.Entity<ContestUser>(builder =>
           {
-               builder.HasKey(user => user.Id);
-               builder.Property(user => user.Id).UseIdentityColumn();
-
-               builder.HasAlternateKey(user => new { user.ContestStageId, user.YandexIdLogin });
+               builder.HasKey(user => new { user.ContestStageId, user.YandexIdLogin });
           });
 
           base.OnModelCreating(modelBuilder);

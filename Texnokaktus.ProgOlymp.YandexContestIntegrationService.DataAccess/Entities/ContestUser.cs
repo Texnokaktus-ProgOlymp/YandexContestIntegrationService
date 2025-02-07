@@ -2,8 +2,7 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Entit
 
 public class ContestUser
 {
-    public int Id { get; set; }
-    public long ContestStageId { get; set; }
-    public string YandexIdLogin { get; set; }
-    public long ContestUserId { get; set; }
+    public required long ContestStageId { get; init; }
+    public required string YandexIdLogin { get; init; }
+    public required long ContestUserId { get; init; }
 }
