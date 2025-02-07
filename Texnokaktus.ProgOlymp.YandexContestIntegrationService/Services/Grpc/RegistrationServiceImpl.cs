@@ -1,3 +1,4 @@
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Exceptions;
@@ -7,7 +8,7 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
 public class RegistrationServiceImpl(IRegistrationService registrationService, ILogger<RegistrationServiceImpl> logger) : RegistrationService.RegistrationServiceBase
 {
-    public override async Task<RegisterParticipantResponse> RegisterParticipant(RegisterParticipantRequest request, ServerCallContext context)
+    public override async Task<Empty> RegisterParticipant(RegisterParticipantRequest request, ServerCallContext context)
     {
         try
         {
@@ -18,60 +19,32 @@ public class RegistrationServiceImpl(IRegistrationService registrationService, I
         {
             throw new RpcException(new(StatusCode.AlreadyExists, e.Message, e));
         }
-        catch (RpcApplicationException e)
+        catch (InvalidYandexUserException e)
         {
-            return new()
-            {
-                Error = new()
-                {
-                    Type = e.ErrorType,
-                    Message = e.Message
-                }
-            };
+            throw new RpcException(new(StatusCode.InvalidArgument, e.Message, e));
         }
         catch (Exception e)
         {
             logger.LogError(e, "An error occurred while registering the user to the contest");
-            return new()
-            {
-                Error = new()
-                {
-                    Type = ErrorType.Generic,
-                    Message = e.Message
-                }
-            };
+            throw;
         }
     }
 
-    public override async Task<UnregisterParticipantResponse> UnregisterParticipant(UnregisterParticipantRequest request, ServerCallContext context)
+    public override async Task<Empty> UnregisterParticipant(UnregisterParticipantRequest request, ServerCallContext context)
     {
         try
         {
             await registrationService.UnregisterUserAsync(request.ContestStageId, request.YandexIdLogin);
             return new();
         }
-        catch (RpcApplicationException e)
+        catch (UserIsNotRegisteredException e)
         {
-            return new()
-            {
-                Error = new()
-                {
-                    Type = e.ErrorType,
-                    Message = e.Message
-                }
-            };
+            throw new RpcException(new(StatusCode.NotFound, e.Message, e));
         }
         catch (Exception e)
         {
             logger.LogError(e, "An error occurred while registering the user to the contest");
-            return new()
-            {
-                Error = new()
-                {
-                    Type = ErrorType.Generic,
-                    Message = e.Message
-                }
-            };
+            throw;
         }
     }
 }
