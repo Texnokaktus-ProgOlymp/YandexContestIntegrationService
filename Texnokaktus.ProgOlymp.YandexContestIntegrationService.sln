@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Texnokaktus.ProgOlymp.Yande
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Texnokaktus.ProgOlymp.YandexContestIntegrationService", "Texnokaktus.ProgOlymp.YandexContestIntegrationService\Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj", "{9FAC16B2-FB46-477E-8EB4-5339E6B8F445}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain.csproj", "{5BD4FA3A-3C28-4BEC-8677-918277851D08}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj", "{6CCF0215-C6CE-4A88-BC1E-DB0B06CC4CBB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{603966CA-A5DC-40C1-9822-13001603C81B}"
@@ -30,10 +28,6 @@ Global
 		{9FAC16B2-FB46-477E-8EB4-5339E6B8F445}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9FAC16B2-FB46-477E-8EB4-5339E6B8F445}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FAC16B2-FB46-477E-8EB4-5339E6B8F445}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5BD4FA3A-3C28-4BEC-8677-918277851D08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5BD4FA3A-3C28-4BEC-8677-918277851D08}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5BD4FA3A-3C28-4BEC-8677-918277851D08}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5BD4FA3A-3C28-4BEC-8677-918277851D08}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6CCF0215-C6CE-4A88-BC1E-DB0B06CC4CBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6CCF0215-C6CE-4A88-BC1E-DB0B06CC4CBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CCF0215-C6CE-4A88-BC1E-DB0B06CC4CBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
