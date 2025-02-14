@@ -5,6 +5,7 @@ using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
+using BriefRunReport = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.BriefRunReport;
 using CompilerLimit = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.CompilerLimit;
 using ContestDescription = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestDescription;
 using ContestProblem = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestProblem;
@@ -13,6 +14,7 @@ using ContestStandingsTitle = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.Yandex
 using ContestStatistics = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStatistics;
 using ContestType = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestType;
 using ParticipantInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantInfo;
+using ParticipantStats = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantStats;
 using ParticipantStatus = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantStatus;
 using ParticipationState = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipationState;
 using ProblemResult = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ProblemResult;
@@ -72,6 +74,18 @@ public class ContestDataServiceImpl(IContestClient contestClient, IParticipantSe
         return new()
         {
             Result = participantStatus.MapParticipationStatus()
+        };
+    }
+
+    public override async Task<ParticipantStatsResponse> GetParticipantStats(ParticipantStatsRequest request, ServerCallContext context)
+    {
+        var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantLogin);
+
+        var stats = await contestClient.GetParticipantStatsAsync(request.ContestId, contestUserId);
+
+        return new()
+        {
+            Result = stats.MapParticipantStats()
         };
     }
 
@@ -239,5 +253,29 @@ file static class MappingExtensions
             YandexClient.Models.UpsolvingAllowance.AllowedAfterParticipationEnds => UpsolvingAllowance.AllowedAfterParticipationEnds,
             YandexClient.Models.UpsolvingAllowance.AllowedAfterContestEnds       => UpsolvingAllowance.AllowedAfterContestEnds,
             _                                                                    => throw new ArgumentOutOfRangeException(nameof(upsolvingAllowance), upsolvingAllowance, "Invalid upsolving allowance type")
+        };
+
+    public static ParticipantStats MapParticipantStats(this YandexClient.Models.ParticipantStats stats) =>
+        new()
+        {
+            StartedAt = stats.StartedAt?.ToTimestamp(),
+            FirstSubmissionTime = stats.FirstSubmissionTime?.ToTimestamp(),
+            Runs = { stats.Runs.Select(run => run.MapBriefRunReport()) }
+        };
+
+    private static BriefRunReport MapBriefRunReport(this YandexClient.Models.BriefRunReport run) =>
+        new()
+        {
+            RunId = run.RunId,
+            ProblemId = run.ProblemId,
+            ProblemAlias = run.ProblemAlias,
+            Compiler = run.Compiler,
+            SubmissionTime = run.SubmissionTime.ToTimestamp(),
+            TimeFromStart = TimeSpan.FromMilliseconds(run.TimeFromStart).ToDuration(),
+            Verdict = run.Verdict,
+            TestNumber = run.TestNumber,
+            MaxTimeUsage = run.MaxTimeUsage,
+            MaxMemoryUsage = run.MaxMemoryUsage,
+            Score = run.Score
         };
 }

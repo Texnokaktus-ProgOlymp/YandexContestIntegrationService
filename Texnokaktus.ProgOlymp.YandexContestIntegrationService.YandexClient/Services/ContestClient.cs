@@ -73,6 +73,11 @@ internal class ContestClient([FromKeyedServices(ClientType.YandexContest)] IRest
         await client.ExecuteGetAndThrowAsync<ParticipantStatus>("contests/{contestId}/participants/{participantId}",
                                                                 request => request.AddUrlSegment("contestId", contestId)
                                                                                   .AddUrlSegment("participantId", participantId));
+
+    public async Task<ParticipantStats> GetParticipantStatsAsync(long contestId, long participantId) =>
+        await client.ExecuteGetAndThrowAsync<ParticipantStats>("contests/{contestId}/participants/{participantId}/stats",
+                                                               request => request.AddUrlSegment("contestId", contestId)
+                                                                                 .AddUrlSegment("participantId", participantId));
 }
 
 file static class ApiClientExtensions
