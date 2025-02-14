@@ -21,4 +21,5 @@ public interface IContestClient
                                                     long? userGroupId = null);
 
     Task<ParticipantStatus> GetParticipantStatusAsync(long contestId, long participantId);
+    Task<ParticipantStats> GetParticipantStatsAsync(long contestId, long participantId);
 }
