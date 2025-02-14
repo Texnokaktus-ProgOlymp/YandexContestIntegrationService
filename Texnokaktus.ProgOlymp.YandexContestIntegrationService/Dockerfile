@@ -11,7 +11,6 @@ ARG VERSION
 WORKDIR /src
 COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService/"]
 COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess/Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess/"]
-COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain/Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.Domain/"]
 COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic/Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic/"]
 COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient/Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient/"]
 COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options/Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options/"]
