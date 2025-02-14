@@ -39,7 +39,13 @@ internal class ContestClient([FromKeyedServices(ClientType.YandexContest)] IRest
                                                               .AddUrlSegment("participantId", participantId)
                                                               .AddJsonBody(model),
                                     Method.Patch);
-    
+
+    public Task<ParticipantInfo[]> GetContestParticipantsAsync(long contestId, string? displayName, string? login) =>
+        client.ExecuteGetAndThrowAsync<ParticipantInfo[]>("contests/{contestId}/participants",
+                                                          request => request.AddUrlSegment("contestId", contestId)
+                                                                            .AddQueryParameterIfNotNull("display_name", displayName)
+                                                                            .AddQueryParameterIfNotNull("login", login));
+
     public async Task<ContestDescription> GetContestDescriptionAsync(long contestId) =>
         await client.ExecuteGetAndThrowAsync<ContestDescription>("contests/{contestId}",
                                                                  request => request.AddUrlSegment("contestId", contestId));
@@ -132,5 +138,15 @@ file static class ApiClientExtensions
     }
 
     public static RestRequest AddQueryParameter<T>(this RestRequest request, string name, T? value, bool encode = true) where T : struct =>
-        value.HasValue ? request.AddQueryParameter(name, value.Value, encode) : request;
+        value.HasValue ?
+            request.AddQueryParameter(name, value.Value, encode) :
+            request;
+
+    public static RestRequest AddQueryParameterIfNotNull(this RestRequest request,
+                                                         string name,
+                                                         string? value,
+                                                         bool encode = true) =>
+        value is not null
+            ? request.AddQueryParameter(name, value, encode)
+            : request;
 }
