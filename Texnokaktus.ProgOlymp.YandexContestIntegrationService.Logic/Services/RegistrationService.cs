@@ -12,16 +12,14 @@ internal class RegistrationService(IParticipantService participantService,
 {
     public async Task RegisterUserAsync(long contestStageId, string yandexIdLogin, string? participantDisplayName)
     {
-        if (await participantService.GetContestUserIdAsync(contestStageId, yandexIdLogin) is not null)
-            throw new UserIsAlreadyRegisteredException(contestStageId, yandexIdLogin);
-
         try
         {
             var contestUserId = await contestClient.RegisterParticipantByLoginAsync(contestStageId, yandexIdLogin);
             if (participantDisplayName is not null)
                 await SetParticipantDisplayNameAsync(contestStageId, contestUserId, participantDisplayName);
 
-            await participantService.AddContestParticipantAsync(contestStageId, yandexIdLogin, contestUserId);
+            if (await participantService.GetContestUserIdAsync(contestStageId, yandexIdLogin) is null)
+                await participantService.AddContestParticipantAsync(contestStageId, yandexIdLogin, contestUserId);
         }
         catch (InvalidUserException e)
         {

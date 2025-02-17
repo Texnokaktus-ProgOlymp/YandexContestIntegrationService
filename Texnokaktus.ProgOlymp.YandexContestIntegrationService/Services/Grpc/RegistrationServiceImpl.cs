@@ -15,10 +15,6 @@ public class RegistrationServiceImpl(IRegistrationService registrationService, I
             await registrationService.RegisterUserAsync(request.ContestStageId, request.YandexIdLogin, request.DisplayName);
             return new();
         }
-        catch (UserIsAlreadyRegisteredException e)
-        {
-            throw new RpcException(new(StatusCode.AlreadyExists, e.Message, e));
-        }
         catch (InvalidYandexUserException e)
         {
             throw new RpcException(new(StatusCode.InvalidArgument, e.Message, e));
