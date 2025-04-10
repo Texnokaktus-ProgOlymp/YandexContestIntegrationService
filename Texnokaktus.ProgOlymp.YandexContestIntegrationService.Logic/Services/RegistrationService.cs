@@ -1,20 +1,25 @@
 using Microsoft.Extensions.Logging;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Client;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Exceptions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Exceptions;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 
 internal class RegistrationService(IParticipantService participantService,
-                                   IContestClient contestClient,
+                                   ContestClient contestClient,
                                    ILogger<RegistrationService> logger) : IRegistrationService
 {
     public async Task RegisterUserAsync(long contestStageId, string yandexIdLogin, string? participantDisplayName)
     {
         try
         {
-            var contestUserId = await contestClient.RegisterParticipantByLoginAsync(contestStageId, yandexIdLogin);
+            var contestUserId = await contestClient.Contests[contestStageId]
+                                                   .Participants
+                                                   .PostAsync(configuration =>
+                                                                  configuration.QueryParameters.Login = yandexIdLogin)
+                             ?? throw new YandexApiException("Unable to get User Id");
+
             if (participantDisplayName is not null)
                 await SetParticipantDisplayNameAsync(contestStageId, contestUserId, participantDisplayName);
 
@@ -32,7 +37,7 @@ internal class RegistrationService(IParticipantService participantService,
         var contestUserId = await participantService.GetContestUserIdAsync(contestStageId, yandexIdLogin)
                          ?? throw new UserIsNotRegisteredException(contestStageId, yandexIdLogin);
 
-        await contestClient.UnregisterParticipantAsync(contestStageId, contestUserId);
+        await contestClient.Contests[contestStageId].Participants[contestUserId].DeleteAsync();
         await participantService.DeleteContestParticipantAsync(contestStageId, yandexIdLogin);
     }
 
@@ -40,7 +45,12 @@ internal class RegistrationService(IParticipantService participantService,
     {
         try
         {
-            await contestClient.UpdateParticipantAsync(yandexContestId, yandexParticipantId, new(displayName));
+            await contestClient.Contests[yandexContestId]
+                               .Participants[yandexParticipantId]
+                               .PatchAsync(new()
+                                {
+                                    DisplayedName = displayName
+                                });
         }
         catch (Exception e)
         {
