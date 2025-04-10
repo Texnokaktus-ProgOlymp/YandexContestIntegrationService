@@ -45,45 +45,6 @@ internal class ContestClient([FromKeyedServices(ClientType.YandexContest)] IRest
                                                           request => request.AddUrlSegment("contestId", contestId)
                                                                             .AddQueryParameterIfNotNull("display_name", displayName)
                                                                             .AddQueryParameterIfNotNull("login", login));
-
-    public async Task<ContestDescription> GetContestDescriptionAsync(long contestId) =>
-        await client.ExecuteGetAndThrowAsync<ContestDescription>("contests/{contestId}",
-                                                                 request => request.AddUrlSegment("contestId", contestId));
-
-    public async Task<ContestProblems> GetContestProblemsAsync(long contestId, string locale = "ru") =>
-        await client.ExecuteGetAndThrowAsync<ContestProblems>("contests/{contestId}/problems",
-                                                              request => request.AddUrlSegment("contestId", contestId)
-                                                                                .AddQueryParameter("locale", locale));
-
-    public async Task<ContestStandings> GetContestStandingsAsync(long contestId,
-                                                                 bool forJudge = false,
-                                                                 string locale = "ru",
-                                                                 int page = 1,
-                                                                 int pageSize = 100,
-                                                                 string? participantSearch = null,
-                                                                 bool showExternal = false,
-                                                                 bool showVirtual = false,
-                                                                 long? userGroupId = null) =>
-        await client.ExecuteGetAndThrowAsync<ContestStandings>("contests/{contestId}/standings",
-                                                               request => request.AddUrlSegment("contestId", contestId)
-                                                                                 .AddQueryParameter("forJudge", forJudge)
-                                                                                 .AddQueryParameter("locale", locale)
-                                                                                 .AddQueryParameter("page", page)
-                                                                                 .AddQueryParameter("pageSize", pageSize)
-                                                                                 .AddQueryParameter("participantSearch", participantSearch)
-                                                                                 .AddQueryParameter("showExternal", showExternal)
-                                                                                 .AddQueryParameter("showVirtual", showVirtual)
-                                                                                 .AddQueryParameter("userGroupId", userGroupId));
-
-    public async Task<ParticipantStatus> GetParticipantStatusAsync(long contestId, long participantId) =>
-        await client.ExecuteGetAndThrowAsync<ParticipantStatus>("contests/{contestId}/participants/{participantId}",
-                                                                request => request.AddUrlSegment("contestId", contestId)
-                                                                                  .AddUrlSegment("participantId", participantId));
-
-    public async Task<ParticipantStats> GetParticipantStatsAsync(long contestId, long participantId) =>
-        await client.ExecuteGetAndThrowAsync<ParticipantStats>("contests/{contestId}/participants/{participantId}/stats",
-                                                               request => request.AddUrlSegment("contestId", contestId)
-                                                                                 .AddUrlSegment("participantId", participantId));
 }
 
 file static class ApiClientExtensions
@@ -136,11 +97,6 @@ file static class ApiClientExtensions
 
         return response.Data;
     }
-
-    public static RestRequest AddQueryParameter<T>(this RestRequest request, string name, T? value, bool encode = true) where T : struct =>
-        value.HasValue ?
-            request.AddQueryParameter(name, value.Value, encode) :
-            request;
 
     public static RestRequest AddQueryParameterIfNotNull(this RestRequest request,
                                                          string name,
