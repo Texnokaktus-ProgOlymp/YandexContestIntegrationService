@@ -2,9 +2,9 @@ using System.Globalization;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Client;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Client.Models;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
+using YandexContestClient.Client;
+using YandexContestClient.Client.Models;
 using BriefRunReport = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.BriefRunReport;
 using CompilerLimit = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.CompilerLimit;
 using ContestDescription = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestDescription;
@@ -100,7 +100,7 @@ public class ContestDataServiceImpl(ContestClient contestClient, IParticipantSer
 
 file static class MappingExtensions
 {
-    public static ContestProblem MapContestProblem(this Client.Models.ContestProblem contestProblem) =>
+    public static ContestProblem MapContestProblem(this YandexContestClient.Client.Models.ContestProblem contestProblem) =>
         new()
         {
             Alias = contestProblem.Alias,
@@ -113,7 +113,7 @@ file static class MappingExtensions
             TestCount = contestProblem.TestCount ?? 0
         };
 
-    private static CompilerLimit MapCompilerLimit(this Client.Models.CompilerLimit compilerLimit) =>
+    private static CompilerLimit MapCompilerLimit(this YandexContestClient.Client.Models.CompilerLimit compilerLimit) =>
         new()
         {
             CompilerName = compilerLimit.CompilerName,
@@ -123,7 +123,7 @@ file static class MappingExtensions
             TimeLimit = compilerLimit.TimeLimit ?? 0L
         };
 
-    private static Statement MapStatement(this Client.Models.Statement statement) =>
+    private static Statement MapStatement(this YandexContestClient.Client.Models.Statement statement) =>
         new()
         {
             Locale = statement.Locale,
@@ -142,7 +142,7 @@ file static class MappingExtensions
             _                       => throw new ArgumentOutOfRangeException(nameof(statementType), statementType, null)
         };
 
-    public static ContestStandings MapContestStandings(this Client.Models.ContestStandings contestStandings) =>
+    public static ContestStandings MapContestStandings(this YandexContestClient.Client.Models.ContestStandings contestStandings) =>
         new()
         {
             Rows = { contestStandings.Rows?.Select(row => row.MapContestStandingRow()) },
@@ -162,7 +162,7 @@ file static class MappingExtensions
                         : null
         };
 
-    private static ParticipantInfo MapParticipantInfo(this Client.Models.ParticipantInfo participantInfo) =>
+    private static ParticipantInfo MapParticipantInfo(this YandexContestClient.Client.Models.ParticipantInfo participantInfo) =>
         new()
         {
             Id = participantInfo.Id ?? 0L,
@@ -172,7 +172,7 @@ file static class MappingExtensions
             Uid = participantInfo.Uid
         };
 
-    private static ProblemResult MapProblemResult(this Client.Models.ProblemResult problemResult) =>
+    private static ProblemResult MapProblemResult(this YandexContestClient.Client.Models.ProblemResult problemResult) =>
         new()
         {
             Score = double.TryParse(problemResult.Score, CultureInfo.GetCultureInfo("ru-RU"), out var score)
@@ -189,14 +189,14 @@ file static class MappingExtensions
             SubmitDelay = TimeSpan.FromSeconds(problemResult.SubmitDelay ?? 0L).ToDuration()
         };
 
-    private static ContestStatistics MapContestStatistics(this Client.Models.ContestStatistics contestStatistics) =>
+    private static ContestStatistics MapContestStatistics(this YandexContestClient.Client.Models.ContestStatistics contestStatistics) =>
         new()
         {
             LastSubmit = contestStatistics.LastSubmit?.MapSubmitInfo(),
             LastSuccess = contestStatistics.LastSuccess?.MapSubmitInfo()
         };
 
-    private static SubmitInfo MapSubmitInfo(this Client.Models.SubmitInfo submitInfo) =>
+    private static SubmitInfo MapSubmitInfo(this YandexContestClient.Client.Models.SubmitInfo submitInfo) =>
         new()
         {
             ParticipantId = submitInfo.ParticipantId ?? 0L,
@@ -205,14 +205,14 @@ file static class MappingExtensions
             SubmitTime = TimeSpan.FromMilliseconds(submitInfo.SubmitTime ?? 0L).ToDuration()
         };
 
-    private static ContestStandingsTitle MapContestStandingsTitle(this Client.Models.ContestStandingsTitle contestStandingsTitle) =>
+    private static ContestStandingsTitle MapContestStandingsTitle(this YandexContestClient.Client.Models.ContestStandingsTitle contestStandingsTitle) =>
         new()
         {
             Name = contestStandingsTitle.Name,
             Title = contestStandingsTitle.Title
         };
 
-    public static ParticipantStatus MapParticipationStatus(this Client.Models.ParticipantStatus participantStatus) =>
+    public static ParticipantStatus MapParticipationStatus(this YandexContestClient.Client.Models.ParticipantStatus participantStatus) =>
         new()
         {
             Name = participantStatus.ParticipantName,
@@ -231,7 +231,7 @@ file static class MappingExtensions
             _                                          => throw new ArgumentOutOfRangeException(nameof(participationState), participationState, null)
         };
 
-    public static ContestDescription MapContestDescription(this Client.Models.ContestDescription contestDescription) =>
+    public static ContestDescription MapContestDescription(this YandexContestClient.Client.Models.ContestDescription contestDescription) =>
         new()
         {
             Name = contestDescription.Name,
@@ -261,7 +261,7 @@ file static class MappingExtensions
             _                                                                      => throw new ArgumentOutOfRangeException(nameof(upsolvingAllowance), upsolvingAllowance, "Invalid upsolving allowance type")
         };
 
-    public static ParticipantStats MapParticipantStats(this Client.Models.ParticipantStats stats) =>
+    public static ParticipantStats MapParticipantStats(this YandexContestClient.Client.Models.ParticipantStats stats) =>
         new()
         {
             StartedAt = DateTimeOffset.TryParse(stats.StartedAt, out var startedAt) ? startedAt.ToTimestamp() : null,
@@ -269,7 +269,7 @@ file static class MappingExtensions
             Runs = { stats.Runs?.Select(run => run.MapBriefRunReport()) }
         };
 
-    private static BriefRunReport MapBriefRunReport(this Client.Models.BriefRunReport run) =>
+    private static BriefRunReport MapBriefRunReport(this YandexContestClient.Client.Models.BriefRunReport run) =>
         new()
         {
             RunId = run.RunId ?? 0L,

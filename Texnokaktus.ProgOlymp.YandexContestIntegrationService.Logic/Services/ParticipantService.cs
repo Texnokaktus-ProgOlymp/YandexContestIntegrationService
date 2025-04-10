@@ -1,6 +1,6 @@
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Client;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Services.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
+using YandexContestClient.Client;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 

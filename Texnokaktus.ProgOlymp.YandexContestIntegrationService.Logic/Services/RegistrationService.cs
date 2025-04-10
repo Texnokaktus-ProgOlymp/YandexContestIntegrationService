@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Client;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Exceptions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Exceptions;
+using YandexContestClient.Client;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 
