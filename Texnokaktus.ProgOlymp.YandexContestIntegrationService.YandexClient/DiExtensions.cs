@@ -3,7 +3,6 @@ using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 using RestSharp;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
 using ContestClient = Texnokaktus.ProgOlymp.YandexContestIntegrationService.Client.ContestClient;
@@ -16,6 +15,7 @@ public static class DiExtensions
         services.AddScoped<IYandexAuthenticationService, YandexAuthenticationService>()
                 .AddScoped<ITokenService, TokenService>()
                 .AddScoped<IAuthenticationProvider, YandexOAuthAuthenticationProvider>()
+                .AddScoped<ObservabilityOptions>(_ => new())
                 .AddScoped<IRequestAdapter, HttpClientRequestAdapter>()
                 .AddScoped<ContestClient>()
                 .AddScoped<IRestClient>(_ => new RestClient("https://oauth.yandex.ru"));
