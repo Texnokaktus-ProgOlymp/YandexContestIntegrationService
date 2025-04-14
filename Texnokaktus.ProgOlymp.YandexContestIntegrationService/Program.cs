@@ -55,6 +55,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapGrpcHealthChecksService();
 
+app.MapGrpcService<CompilerServiceImpl>();
 app.MapGrpcService<ContestDataServiceImpl>();
 app.MapGrpcService<RegistrationServiceImpl>();
 app.MapGrpcService<YandexAuthenticationServiceImpl>();
