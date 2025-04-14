@@ -3,8 +3,8 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Models;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
+using YandexContestClient.Client;
+using YandexContestClient.Client.Models;
 using BriefRunReport = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.BriefRunReport;
 using CompilerLimit = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.CompilerLimit;
 using ContestDescription = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestDescription;
@@ -16,7 +16,6 @@ using ContestType = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Co
 using ParticipantInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantInfo;
 using ParticipantStats = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantStats;
 using ParticipantStatus = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantStatus;
-using ParticipationState = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipationState;
 using ProblemResult = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ProblemResult;
 using Statement = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Statement;
 using SubmitInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.SubmitInfo;
@@ -24,7 +23,7 @@ using UpsolvingAllowance = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexCon
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class ContestDataServiceImpl(IContestClient contestClient, IParticipantService participantService) : ContestDataService.ContestDataServiceBase
+public class ContestDataServiceImpl(ContestClient contestClient, IParticipantService participantService) : ContestDataService.ContestDataServiceBase
 {
     public override Task<GetContestUrlResponse> GetContestUrl(GetContestUrlRequest request, ServerCallContext context) =>
         Task.FromResult<GetContestUrlResponse>(new()
@@ -34,34 +33,39 @@ public class ContestDataServiceImpl(IContestClient contestClient, IParticipantSe
 
     public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
     {
-        var contestDescription = await contestClient.GetContestDescriptionAsync(request.ContestId);
+        var contestDescription = await contestClient.Contests[request.ContestId].GetAsync();
 
         return new()
         {
-            Result = contestDescription.MapContestDescription()
+            Result = contestDescription?.MapContestDescription()
         };
     }
 
     public override async Task<GetProblemsResponse> GetProblems(GetProblemsRequest request, ServerCallContext context)
     {
-        var contestProblems = await contestClient.GetContestProblemsAsync(request.ContestId);
+        var contestProblems = await contestClient.Contests[request.ContestId].Problems.GetAsync();
 
         return new()
         {
-            Problems = { contestProblems.Problems.Select(problem => problem.MapContestProblem()) }
+            Problems = { contestProblems?.Problems?.Select(problem => problem.MapContestProblem()) }
         };
     }
 
     public override async Task<GetStandingsResponse> GetStandings(GetStandingsRequest request, ServerCallContext context)
     {
-        var contestStandings = await contestClient.GetContestStandingsAsync(request.ContestId,
-                                                                            forJudge: true,
-                                                                            page: request.PageIndex,
-                                                                            pageSize: request.PageSize,
-                                                                            participantSearch: request.ParticipantSearch);
+        var contestStandings = await contestClient.Contests[request.ContestId]
+                                                  .Standings
+                                                  .GetAsync(configuration =>
+                                                   {
+                                                       configuration.QueryParameters.ForJudge = true;
+                                                       configuration.QueryParameters.Page = request.PageIndex;
+                                                       configuration.QueryParameters.PageSize = request.PageSize;
+                                                       configuration.QueryParameters.ParticipantSearch = request.ParticipantSearch;
+                                                   });
+
         return new()
         {
-            Result = contestStandings.MapContestStandings()
+            Result = contestStandings?.MapContestStandings()
         };
     }
 
@@ -69,11 +73,11 @@ public class ContestDataServiceImpl(IContestClient contestClient, IParticipantSe
     {
         var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantLogin);
 
-        var participantStatus = await contestClient.GetParticipantStatusAsync(request.ContestId, contestUserId);
+        var participantStatus = await contestClient.Contests[request.ContestId].Participants[contestUserId].GetAsync();
 
         return new()
         {
-            Result = participantStatus.MapParticipationStatus()
+            Result = participantStatus?.MapParticipationStatus()
         };
     }
 
@@ -81,11 +85,11 @@ public class ContestDataServiceImpl(IContestClient contestClient, IParticipantSe
     {
         var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantLogin);
 
-        var stats = await contestClient.GetParticipantStatsAsync(request.ContestId, contestUserId);
+        var stats = await contestClient.Contests[request.ContestId].Participants[contestUserId].Stats.GetAsync();
 
         return new()
         {
-            Result = stats.MapParticipantStats()
+            Result = stats?.MapParticipantStats()
         };
     }
 
@@ -96,76 +100,79 @@ public class ContestDataServiceImpl(IContestClient contestClient, IParticipantSe
 
 file static class MappingExtensions
 {
-    public static ContestProblem MapContestProblem(this YandexClient.Models.ContestProblem contestProblem) =>
+    public static ContestProblem MapContestProblem(this YandexContestClient.Client.Models.ContestProblem contestProblem) =>
         new()
         {
             Alias = contestProblem.Alias,
             Compilers = { contestProblem.Compilers },
             Id = contestProblem.Id,
-            Limits = { contestProblem.Limits.Select(limit => limit.MapCompilerLimit()) },
+            Limits = { contestProblem.Limits?.Select(limit => limit.MapCompilerLimit()) },
             Name = contestProblem.Name,
             ProblemType = contestProblem.ProblemType,
-            Statements = { contestProblem.Statements.Select(statement => statement.MapStatement()) },
-            TestCount = contestProblem.TestCount
+            Statements = { contestProblem.Statements?.Select(statement => statement.MapStatement()) },
+            TestCount = contestProblem.TestCount ?? 0
         };
 
-    private static CompilerLimit MapCompilerLimit(this YandexClient.Models.CompilerLimit compilerLimit) =>
+    private static CompilerLimit MapCompilerLimit(this YandexContestClient.Client.Models.CompilerLimit compilerLimit) =>
         new()
         {
             CompilerName = compilerLimit.CompilerName,
-            IdlenessLimit = compilerLimit.IdlenessLimit,
-            MemoryLimit = compilerLimit.MemoryLimit,
-            OutputLimit = compilerLimit.OutputLimit,
-            TimeLimit = compilerLimit.TimeLimit
+            IdlenessLimit = compilerLimit.IdlenessLimit ?? 0L,
+            MemoryLimit = compilerLimit.MemoryLimit ?? 0L,
+            OutputLimit = compilerLimit.OutputLimit ?? 0L,
+            TimeLimit = compilerLimit.TimeLimit ?? 0L
         };
 
-    private static Statement MapStatement(this YandexClient.Models.Statement statement) =>
+    private static Statement MapStatement(this YandexContestClient.Client.Models.Statement statement) =>
         new()
         {
             Locale = statement.Locale,
             Path = statement.Path,
-            Type = statement.Type switch
-            {
-                "TEX"      => StatementType.Tex,
-                "PDF"      => StatementType.Pdf,
-                "BINARY"   => StatementType.Binary,
-                "OLYMP"    => StatementType.Olymp,
-                "MARKDOWN" => StatementType.Markdown,
-                _          => throw new ArgumentOutOfRangeException(nameof(statement), statement.Type, "Invalid statement type")
-            }
+            Type = statement.Type.MapStatementType() 
         };
 
-    public static ContestStandings MapContestStandings(this YandexClient.Models.ContestStandings contestStandings) =>
+    private static StatementType MapStatementType(this Statement_type? statementType) =>
+        statementType switch
+        {
+            Statement_type.TEX      => StatementType.Tex,
+            Statement_type.PDF      => StatementType.Pdf,
+            Statement_type.BINARY   => StatementType.Binary,
+            Statement_type.MARKDOWN => StatementType.Markdown,
+            null                    => throw new ArgumentNullException(nameof(statementType)),
+            _                       => throw new ArgumentOutOfRangeException(nameof(statementType), statementType, null)
+        };
+
+    public static ContestStandings MapContestStandings(this YandexContestClient.Client.Models.ContestStandings contestStandings) =>
         new()
         {
-            Rows = { contestStandings.Rows.Select(row => row.MapContestStandingRow()) },
-            Statistics = contestStandings.Statistics.MapContestStatistics(),
-            Titles = { contestStandings.Titles.Select(title => title.MapContestStandingsTitle()) }
+            Rows = { contestStandings.Rows?.Select(row => row.MapContestStandingRow()) },
+            Statistics = contestStandings.Statistics?.MapContestStatistics(),
+            Titles = { contestStandings.Titles?.Select(title => title.MapContestStandingsTitle()) }
         };
 
     private static ContestStandingRow MapContestStandingRow(this ContestStandingsRow contestStandingsRow) =>
         new()
         {
-            ParticipantInfo = contestStandingsRow.ParticipantInfo.MapParticipantInfo(),
-            PlaceFrom = { contestStandingsRow.PlaceFrom },
-            PlaceTo = { contestStandingsRow.PlaceTo },
-            ProblemResults = { contestStandingsRow.ProblemResults.Select(result => result.MapProblemResult()) },
+            ParticipantInfo = contestStandingsRow.ParticipantInfo?.MapParticipantInfo(),
+            PlaceFrom = { contestStandingsRow.PlaceFrom?.Select(i => i!.Value) },
+            PlaceTo = { contestStandingsRow.PlaceTo?.Select(i => i!.Value) },
+            ProblemResults = { contestStandingsRow.ProblemResults?.Select(result => result.MapProblemResult()) },
             Score = double.TryParse(contestStandingsRow.Score, CultureInfo.GetCultureInfo("ru-RU"), out var score)
                         ? score
                         : null
         };
 
-    private static ParticipantInfo MapParticipantInfo(this YandexClient.Models.ParticipantInfo participantInfo) =>
+    private static ParticipantInfo MapParticipantInfo(this YandexContestClient.Client.Models.ParticipantInfo participantInfo) =>
         new()
         {
-            Id = participantInfo.Id,
+            Id = participantInfo.Id ?? 0L,
             Login = participantInfo.Login,
             Name = participantInfo.Name,
             StartTime = participantInfo.StartTime,
             Uid = participantInfo.Uid
         };
 
-    private static ProblemResult MapProblemResult(this YandexClient.Models.ProblemResult problemResult) =>
+    private static ProblemResult MapProblemResult(this YandexContestClient.Client.Models.ProblemResult problemResult) =>
         new()
         {
             Score = double.TryParse(problemResult.Score, CultureInfo.GetCultureInfo("ru-RU"), out var score)
@@ -178,104 +185,103 @@ file static class MappingExtensions
                 "NOT_SUBMITTED" => SubmissionStatus.NotSubmitted,
                 _               => SubmissionStatus.Other
             },
-            SubmissionCount = int.Parse(problemResult.SubmissionCount),
-            SubmitDelay = TimeSpan.FromSeconds(problemResult.SubmitDelay).ToDuration()
+            SubmissionCount = int.TryParse(problemResult.SubmissionCount, out var result) ? result : 0,
+            SubmitDelay = TimeSpan.FromSeconds(problemResult.SubmitDelay ?? 0L).ToDuration()
         };
 
-    private static ContestStatistics MapContestStatistics(this YandexClient.Models.ContestStatistics contestStatistics) =>
+    private static ContestStatistics MapContestStatistics(this YandexContestClient.Client.Models.ContestStatistics contestStatistics) =>
         new()
         {
-            LastSubmit = contestStatistics.LastSubmit.MapSubmitInfo(),
-            LastSuccess = contestStatistics.LastSuccess.MapSubmitInfo()
+            LastSubmit = contestStatistics.LastSubmit?.MapSubmitInfo(),
+            LastSuccess = contestStatistics.LastSuccess?.MapSubmitInfo()
         };
 
-    private static SubmitInfo MapSubmitInfo(this YandexClient.Models.SubmitInfo submitInfo) =>
+    private static SubmitInfo MapSubmitInfo(this YandexContestClient.Client.Models.SubmitInfo submitInfo) =>
         new()
         {
-            ParticipantId = submitInfo.ParticipantId,
+            ParticipantId = submitInfo.ParticipantId ?? 0L,
             ParticipantName = submitInfo.ParticipantName,
             ProblemTitle = submitInfo.ProblemTitle,
-            SubmitTime = TimeSpan.FromMilliseconds(submitInfo.SubmitTime).ToDuration()
+            SubmitTime = TimeSpan.FromMilliseconds(submitInfo.SubmitTime ?? 0L).ToDuration()
         };
 
-    private static ContestStandingsTitle MapContestStandingsTitle(this YandexClient.Models.ContestStandingsTitle contestStandingsTitle) =>
+    private static ContestStandingsTitle MapContestStandingsTitle(this YandexContestClient.Client.Models.ContestStandingsTitle contestStandingsTitle) =>
         new()
         {
             Name = contestStandingsTitle.Name,
             Title = contestStandingsTitle.Title
         };
 
-    public static ParticipantStatus MapParticipationStatus(this YandexClient.Models.ParticipantStatus participantStatus) =>
+    public static ParticipantStatus MapParticipationStatus(this YandexContestClient.Client.Models.ParticipantStatus participantStatus) =>
         new()
         {
-            Name = participantStatus.Name,
-            StartTime = participantStatus.StartTime?.ToTimestamp(),
-            FinishTime = participantStatus.FinishTime?.ToTimestamp(),
-            LeftTimeMilliseconds = participantStatus.LeftTimeMilliseconds,
-            State = participantStatus.State.MapParticipationState()
+            Name = participantStatus.ParticipantName,
+            StartTime = DateTimeOffset.TryParse(participantStatus.ParticipantStartTime, out var startTime) ? startTime.ToTimestamp() : null,
+            FinishTime = DateTimeOffset.TryParse(participantStatus.ParticipantFinishTime, out var finishTime) ? finishTime.ToTimestamp() : null,
+            LeftTimeMilliseconds = participantStatus.ParticipantLeftTimeMillis ?? 0,
+            State = participantStatus.ContestState.MapParticipationState()
         };
 
-    private static ParticipationState MapParticipationState(this YandexClient.Models.ParticipationState participationState) =>
+    private static ParticipationState MapParticipationState(this ParticipantStatus_contestState? participationState) =>
         participationState switch
         {
-            YandexClient.Models.ParticipationState.InProgress => ParticipationState.InProgress,
-            YandexClient.Models.ParticipationState.Finished   => ParticipationState.Finished,
-            _                                                 => ParticipationState.NotStarted
+            ParticipantStatus_contestState.IN_PROGRESS => ParticipationState.InProgress,
+            ParticipantStatus_contestState.FINISHED    => ParticipationState.Finished,
+            ParticipantStatus_contestState.NOT_STARTED => ParticipationState.NotStarted,
+            _                                          => throw new ArgumentOutOfRangeException(nameof(participationState), participationState, null)
         };
 
-    public static ContestDescription MapContestDescription(
-        this YandexClient.Models.ContestDescription contestDescription) =>
+    public static ContestDescription MapContestDescription(this YandexContestClient.Client.Models.ContestDescription contestDescription) =>
         new()
         {
             Name = contestDescription.Name,
-            StartTime = contestDescription.StartTime.ToTimestamp(),
-            Duration = TimeSpan.FromSeconds(contestDescription.DurationSeconds).ToDuration(),
-            FreezeTime = contestDescription.FreezeTimeSeconds is { } freezeTimeSeconds
-                             ? TimeSpan.FromSeconds(freezeTimeSeconds)
-                                       .ToDuration()
-                             : null,
+            StartTime = DateTime.TryParse(contestDescription.StartTime, out var dateTime) ? dateTime.ToTimestamp() : null,
+            Duration = contestDescription.Duration is { } duration ? TimeSpan.FromSeconds(duration).ToDuration() : null,
+            FreezeTime = contestDescription.FreezeTime is { } freezeTimeSeconds ? TimeSpan.FromSeconds(freezeTimeSeconds).ToDuration() : null,
             Type = contestDescription.Type.MapContestType(),
             UpsolvingAllowance = contestDescription.UpsolvingAllowance.MapUpsolvingAllowance()
         };
 
-    private static ContestType MapContestType(this YandexClient.Models.ContestType contestType) =>
+    private static ContestType MapContestType(this ContestDescription_type? contestType) =>
         contestType switch
         {
-            YandexClient.Models.ContestType.Usual   => ContestType.Usual,
-            YandexClient.Models.ContestType.Virtual => ContestType.Virtual,
-            _                                       => throw new ArgumentOutOfRangeException(nameof(contestType), contestType, "Invalid contest type")
+            ContestDescription_type.USUAL   => ContestType.Usual,
+            ContestDescription_type.VIRTUAL => ContestType.Virtual,
+            null                            => throw new ArgumentNullException(nameof(contestType)),
+            _                               => throw new ArgumentOutOfRangeException(nameof(contestType), contestType, "Invalid contest type")
         };
 
-    private static UpsolvingAllowance MapUpsolvingAllowance(this YandexClient.Models.UpsolvingAllowance upsolvingAllowance) =>
+    private static UpsolvingAllowance MapUpsolvingAllowance(this ContestDescription_upsolvingAllowance? upsolvingAllowance) =>
         upsolvingAllowance switch
         {
-            YandexClient.Models.UpsolvingAllowance.Prohibited                    => UpsolvingAllowance.Prohibited,
-            YandexClient.Models.UpsolvingAllowance.AllowedAfterParticipationEnds => UpsolvingAllowance.AllowedAfterParticipationEnds,
-            YandexClient.Models.UpsolvingAllowance.AllowedAfterContestEnds       => UpsolvingAllowance.AllowedAfterContestEnds,
-            _                                                                    => throw new ArgumentOutOfRangeException(nameof(upsolvingAllowance), upsolvingAllowance, "Invalid upsolving allowance type")
+            ContestDescription_upsolvingAllowance.PROHIBITED                       => UpsolvingAllowance.Prohibited,
+            ContestDescription_upsolvingAllowance.ALLOWED_AFTER_PARTICIPATION_ENDS => UpsolvingAllowance.AllowedAfterParticipationEnds,
+            ContestDescription_upsolvingAllowance.ALLOWED_AFTER_CONTEST_ENDS       => UpsolvingAllowance.AllowedAfterContestEnds,
+            null                                                                   => throw new ArgumentNullException(nameof(upsolvingAllowance)),
+            _                                                                      => throw new ArgumentOutOfRangeException(nameof(upsolvingAllowance), upsolvingAllowance, "Invalid upsolving allowance type")
         };
 
-    public static ParticipantStats MapParticipantStats(this YandexClient.Models.ParticipantStats stats) =>
+    public static ParticipantStats MapParticipantStats(this YandexContestClient.Client.Models.ParticipantStats stats) =>
         new()
         {
-            StartedAt = stats.StartedAt?.ToTimestamp(),
-            FirstSubmissionTime = stats.FirstSubmissionTime?.ToTimestamp(),
-            Runs = { stats.Runs.Select(run => run.MapBriefRunReport()) }
+            StartedAt = DateTimeOffset.TryParse(stats.StartedAt, out var startedAt) ? startedAt.ToTimestamp() : null,
+            FirstSubmissionTime = DateTimeOffset.TryParse(stats.FirstSubmissionTime, out var firstSubmissionTime) ? firstSubmissionTime.ToTimestamp() : null,
+            Runs = { stats.Runs?.Select(run => run.MapBriefRunReport()) }
         };
 
-    private static BriefRunReport MapBriefRunReport(this YandexClient.Models.BriefRunReport run) =>
+    private static BriefRunReport MapBriefRunReport(this YandexContestClient.Client.Models.BriefRunReport run) =>
         new()
         {
-            RunId = run.RunId,
+            RunId = run.RunId ?? 0L,
             ProblemId = run.ProblemId,
             ProblemAlias = run.ProblemAlias,
             Compiler = run.Compiler,
-            SubmissionTime = run.SubmissionTime.ToTimestamp(),
-            TimeFromStart = TimeSpan.FromMilliseconds(run.TimeFromStart).ToDuration(),
+            SubmissionTime = DateTimeOffset.TryParse(run.SubmissionTime, out var x) ? x.ToTimestamp() : null,
+            TimeFromStart = TimeSpan.FromMilliseconds(run.TimeFromStart ?? 0L).ToDuration(),
             Verdict = run.Verdict,
-            TestNumber = run.TestNumber,
-            MaxTimeUsage = run.MaxTimeUsage,
-            MaxMemoryUsage = run.MaxMemoryUsage,
+            TestNumber = run.TestNumber ?? 0,
+            MaxTimeUsage = run.MaxTimeUsage ?? 0L,
+            MaxMemoryUsage = run.MaxMemoryUsage ?? 0L,
             Score = run.Score
         };
 }

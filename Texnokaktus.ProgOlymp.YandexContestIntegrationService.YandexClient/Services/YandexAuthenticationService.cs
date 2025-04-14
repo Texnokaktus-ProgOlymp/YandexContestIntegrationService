@@ -8,7 +8,7 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Service
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services;
 
-internal class YandexAuthenticationService([FromKeyedServices(ClientType.YandexOAuth)] IRestClient client,
+internal class YandexAuthenticationService(IRestClient client,
                                            IOptions<YandexAppParameters> options) : IYandexAuthenticationService
 {
     public string GetYandexOAuthUrl(string? localRedirectUri)
