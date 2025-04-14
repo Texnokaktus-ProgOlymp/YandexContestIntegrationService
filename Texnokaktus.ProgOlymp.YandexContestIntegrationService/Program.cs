@@ -15,7 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
        .AddLogicLayerServices()
-       .AddDataAccess(optionsBuilder => optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultDb")))
+       .AddDataAccess(optionsBuilder => optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultDb"))
+                                                      .EnableSensitiveDataLogging(builder.Environment.IsDevelopment()))
        .AddServiceOptions()
        .AddYandexClientServices();
 
@@ -57,6 +58,7 @@ app.MapGrpcHealthChecksService();
 
 app.MapGrpcService<CompilerServiceImpl>();
 app.MapGrpcService<ContestDataServiceImpl>();
+app.MapGrpcService<ParticipantServiceImpl>();
 app.MapGrpcService<RegistrationServiceImpl>();
 app.MapGrpcService<YandexAuthenticationServiceImpl>();
 
