@@ -1,0 +1,10 @@
+﻿<Solution>
+  <Folder Name="/Common/">
+    <Project Path="modules\Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts.csproj" Type="Classic C#" />
+  </Folder>
+  <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj" Type="Classic C#" />
+  <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj" Type="Classic C#" />
+  <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options.csproj" Type="Classic C#" />
+  <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient\Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.csproj" Type="Classic C#" />
+  <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService\Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" Type="Classic C#" />
+</Solution>
