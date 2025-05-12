@@ -60,6 +60,7 @@ app.MapGrpcService<CompilerServiceImpl>();
 app.MapGrpcService<ContestDataServiceImpl>();
 app.MapGrpcService<ParticipantServiceImpl>();
 app.MapGrpcService<RegistrationServiceImpl>();
+app.MapGrpcService<SubmissionServiceImpl>();
 app.MapGrpcService<YandexAuthenticationServiceImpl>();
 
 await app.RunAsync();
