@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
@@ -10,7 +9,9 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
 public class SubmissionServiceImpl(ContestClient client) : SubmissionService.SubmissionServiceBase
 {
-    public override async Task GetSubmissions(GetSubmissionsRequest request, IServerStreamWriter<Submission> responseStream, ServerCallContext context)
+    public override async Task GetSubmissions(GetSubmissionsRequest request,
+                                              IServerStreamWriter<Submission> responseStream,
+                                              ServerCallContext context)
     {
         var currentPage = 0;
         var processed = 0;
@@ -53,8 +54,8 @@ file static class MappingExtensions
             TimeFromStart = TimeSpan.FromMilliseconds(submission.TimeFromStart ?? 0)
                                     .ToDuration(),
             Score = submission.Score is { } score
-                ? Convert.ToDecimal(score)
-                : null,
+                        ? Convert.ToDecimal(score)
+                        : null,
             Test = submission.Test,
             Verdict = submission.Verdict
         };
