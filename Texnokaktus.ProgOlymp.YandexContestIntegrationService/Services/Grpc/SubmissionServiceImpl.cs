@@ -7,7 +7,9 @@ using MimeKit;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using YandexContestClient.Client;
 using YandexContestClient.Client.Models;
+using Enum = System.Enum;
 using Submission = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Submission;
+using TestLog = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.TestLog;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
@@ -35,6 +37,23 @@ public class SubmissionServiceImpl(ContestClient client, ITransferUtility transf
                 processed++;
             }
         } while (processed < submissions?.Count);
+    }
+
+    public override async Task<SubmissionFullReport> GetSubmissionFullReport(GetSubmissionFullReportRequest request, ServerCallContext context)
+    {
+        var runReport = await client.Contests[request.ContestStageId]
+                                    .Submissions[request.SubmissionId]
+                                    .Full
+                                    .GetAsync(cancellationToken: context.CancellationToken);
+
+        return new()
+        {
+            IpAddress = runReport?.Ip,
+            Tests =
+            {
+                runReport?.CheckerLog?.Select(log => log.MapTestLog())
+            }
+        };
     }
 
     public override async Task<DownloadSubmissionSourceResponse> DownloadSubmissionSource(DownloadSubmissionSourceRequest request, ServerCallContext context)
@@ -95,6 +114,24 @@ file static class MappingExtensions
                         ? Convert.ToDecimal(score)
                         : null,
             Test = submission.Test,
-            Verdict = submission.Verdict
+            Verdict = submission.Verdict.MapVerdict()
         };
+
+    public static TestLog MapTestLog(this YandexContestClient.Client.Models.TestLog testLog) =>
+        new()
+        {
+            SequenceNumber = testLog.SequenceNumber ?? 0,
+            TestName = testLog.TestName,
+            TestSetId = testLog.TestsetIdx ?? 0,
+            Memory = testLog.MemoryUsed,
+            Time = TimeSpan.FromMilliseconds(testLog.RunningTime ?? 0).ToDuration(),
+            IsSample = testLog.IsSample ?? false,
+            Verdict = testLog.Verdict.MapVerdict()
+        };
+
+    private static Verdict MapVerdict(this string? verdictString) =>
+        Enum.TryParse(typeof(Verdict), verdictString, true, out var result)
+     && result is Verdict verdict
+            ? verdict
+            : Verdict.Unknown;
 }
