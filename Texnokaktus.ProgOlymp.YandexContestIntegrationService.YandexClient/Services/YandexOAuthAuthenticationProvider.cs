@@ -13,7 +13,6 @@ internal class YandexOAuthAuthenticationProvider(ITokenService tokenService) : I
                                                Dictionary<string, object>? additionalAuthenticationContext = null,
                                                CancellationToken cancellationToken = new())
     {
-
         ArgumentNullException.ThrowIfNull(request);
 
         request.Headers.Remove(AuthorizationHeaderKey);

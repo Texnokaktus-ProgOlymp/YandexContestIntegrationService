@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options.Models;
@@ -36,7 +35,7 @@ internal class YandexAuthenticationService(IRestClient client,
     {
         var request = new RestRequest("token");
         requestAction.Invoke(request);
-        
+
         var response = await client.ExecutePostAsync<TokenResponse>(request);
 
         if (!response.IsSuccessful)

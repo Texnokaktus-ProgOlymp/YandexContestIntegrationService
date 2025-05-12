@@ -5,15 +5,15 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Conte
 
 public class AppDbContext(DbContextOptions options) : DbContext(options)
 {
-     public DbSet<ContestUser> ContestUsers => Set<ContestUser>();
+    public DbSet<ContestUser> ContestUsers => Set<ContestUser>();
 
-     protected override void OnModelCreating(ModelBuilder modelBuilder)
-     {
-          modelBuilder.Entity<ContestUser>(builder =>
-          {
-               builder.HasKey(user => new { user.ContestStageId, user.YandexIdLogin });
-          });
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ContestUser>(builder =>
+        {
+            builder.HasKey(user => new { user.ContestStageId, user.YandexIdLogin });
+        });
 
-          base.OnModelCreating(modelBuilder);
-     }
+        base.OnModelCreating(modelBuilder);
+    }
 }

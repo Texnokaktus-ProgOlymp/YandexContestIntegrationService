@@ -47,8 +47,12 @@ file static class MappingExtensions
         new()
         {
             Name = participantStatus.ParticipantName,
-            StartTime = DateTimeOffset.TryParse(participantStatus.ParticipantStartTime, out var startTime) ? startTime.ToTimestamp() : null,
-            FinishTime = DateTimeOffset.TryParse(participantStatus.ParticipantFinishTime, out var finishTime) ? finishTime.ToTimestamp() : null,
+            StartTime = DateTimeOffset.TryParse(participantStatus.ParticipantStartTime, out var startTime)
+                            ? startTime.ToTimestamp()
+                            : null,
+            FinishTime = DateTimeOffset.TryParse(participantStatus.ParticipantFinishTime, out var finishTime)
+                             ? finishTime.ToTimestamp()
+                             : null,
             LeftTimeMilliseconds = participantStatus.ParticipantLeftTimeMillis ?? 0,
             State = participantStatus.ContestState.MapParticipationState()
         };
@@ -57,7 +61,9 @@ file static class MappingExtensions
         new()
         {
             StartedAt = DateTimeOffset.TryParse(stats.StartedAt, out var startedAt) ? startedAt.ToTimestamp() : null,
-            FirstSubmissionTime = DateTimeOffset.TryParse(stats.FirstSubmissionTime, out var firstSubmissionTime) ? firstSubmissionTime.ToTimestamp() : null,
+            FirstSubmissionTime = DateTimeOffset.TryParse(stats.FirstSubmissionTime, out var firstSubmissionTime)
+                                      ? firstSubmissionTime.ToTimestamp()
+                                      : null,
             Runs = { stats.Runs?.Select(run => run.MapBriefRunReport()) }
         };
 

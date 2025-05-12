@@ -11,7 +11,9 @@ internal class ParticipantService(IUnitOfWork unitOfWork, ContestClient contestC
         if (await unitOfWork.ContestUserRepository.GetAsync(contestStageId, participantLogin) is { } contestUser)
             return contestUser.ContestUserId;
 
-        var participants = await contestClient.Contests[contestStageId].Participants.GetAsync(configuration => configuration.QueryParameters.Login = participantLogin);
+        var participants = await contestClient.Contests[contestStageId]
+                                              .Participants
+                                              .GetAsync(configuration => configuration.QueryParameters.Login = participantLogin);
 
         if (participants?.FirstOrDefault(x => x.Login == participantLogin) is not { Id: not null, Login: not null } participantInfo)
             return null;

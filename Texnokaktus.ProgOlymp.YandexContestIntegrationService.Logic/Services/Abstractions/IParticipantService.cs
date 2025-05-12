@@ -1,4 +1,3 @@
-
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 
 public interface IParticipantService

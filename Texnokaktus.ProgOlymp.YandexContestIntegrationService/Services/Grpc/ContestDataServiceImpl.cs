@@ -96,7 +96,7 @@ file static class MappingExtensions
         {
             Locale = statement.Locale,
             Path = statement.Path,
-            Type = statement.Type.MapStatementType() 
+            Type = statement.Type.MapStatementType()
         };
 
     private static StatementType MapStatementType(this Statement_type? statementType) =>
@@ -184,9 +184,13 @@ file static class MappingExtensions
         new()
         {
             Name = contestDescription.Name,
-            StartTime = DateTime.TryParse(contestDescription.StartTime, out var dateTime) ? dateTime.ToTimestamp() : null,
+            StartTime = DateTime.TryParse(contestDescription.StartTime, out var dateTime)
+                            ? dateTime.ToTimestamp()
+                            : null,
             Duration = contestDescription.Duration is { } duration ? TimeSpan.FromSeconds(duration).ToDuration() : null,
-            FreezeTime = contestDescription.FreezeTime is { } freezeTimeSeconds ? TimeSpan.FromSeconds(freezeTimeSeconds).ToDuration() : null,
+            FreezeTime = contestDescription.FreezeTime is { } freezeTimeSeconds
+                             ? TimeSpan.FromSeconds(freezeTimeSeconds).ToDuration()
+                             : null,
             Type = contestDescription.Type.MapContestType(),
             UpsolvingAllowance = contestDescription.UpsolvingAllowance.MapUpsolvingAllowance()
         };
