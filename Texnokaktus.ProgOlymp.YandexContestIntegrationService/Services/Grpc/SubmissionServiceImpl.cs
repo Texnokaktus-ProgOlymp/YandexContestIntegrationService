@@ -1,5 +1,9 @@
+using Amazon.S3.Transfer;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Microsoft.Kiota.Http.HttpClientLibrary.Middleware.Options;
+using Microsoft.Net.Http.Headers;
+using MimeKit;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using YandexContestClient.Client;
 using YandexContestClient.Client.Models;
@@ -7,7 +11,7 @@ using Submission = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Sub
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class SubmissionServiceImpl(ContestClient client) : SubmissionService.SubmissionServiceBase
+public class SubmissionServiceImpl(ContestClient client, ITransferUtility transferUtility) : SubmissionService.SubmissionServiceBase
 {
     public override async Task GetSubmissions(GetSubmissionsRequest request,
                                               IServerStreamWriter<Submission> responseStream,
@@ -31,6 +35,40 @@ public class SubmissionServiceImpl(ContestClient client) : SubmissionService.Sub
                 processed++;
             }
         } while (processed < submissions?.Count);
+    }
+
+    public override async Task<DownloadSubmissionSourceResponse> DownloadSubmissionSource(DownloadSubmissionSourceRequest request, ServerCallContext context)
+    {
+        var headersInspectionHandlerOption = new HeadersInspectionHandlerOption
+        {
+            InspectResponseHeaders = true
+        };
+
+        await using var stream = await client.Contests[request.ContestStageId]
+                                             .Submissions[request.SubmissionId]
+                                             .Source
+                                             .GetAsync(configuration => configuration.Options.Add(headersInspectionHandlerOption),
+                                                       context.CancellationToken);
+
+        var key = headersInspectionHandlerOption.ResponseHeaders.TryGetValue(HeaderNames.ContentDisposition, out var contentDispositionValues)
+               && contentDispositionValues.FirstOrDefault() is { } contentDispositionValue
+               && ContentDisposition.TryParse(contentDispositionValue, out var contentDisposition)
+               && contentDisposition.FileName is { } fileName
+                      ? fileName
+                      : request.SubmissionId.ToString();
+
+        await transferUtility.UploadAsync(new()
+                                          {
+                                              BucketName = "submissions",
+                                              Key = key,
+                                              InputStream = stream
+                                          },
+                                          context.CancellationToken);
+
+        return new()
+        {
+            FileName = key
+        };
     }
 }
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using StackExchange.Redis;
+using Texnokaktus.ProgOlymp.Configuration.S3;
 using Texnokaktus.ProgOlymp.OpenTelemetry;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.HealthChecks;
@@ -24,6 +25,8 @@ var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(builder.Con
 builder.Services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
 builder.Services.AddStackExchangeRedisCache(options => options.ConnectionMultiplexerFactory = () => Task.FromResult<IConnectionMultiplexer>(connectionMultiplexer));
 builder.Services.AddMemoryCache();
+
+builder.Services.AddS3();
 
 builder.Services.AddSingleton(TimeProvider.System);
 
