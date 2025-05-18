@@ -13,8 +13,19 @@ using TestLog = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.TestLo
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
+/// <summary>
+/// A service class implementing the gRPC-based submission handling functionality, providing various operations
+/// related to submissions in the Yandex Contest.
+/// </summary>
 public class SubmissionServiceImpl(ContestClient client, ITransferUtility transferUtility) : SubmissionService.SubmissionServiceBase
 {
+    /// <summary>
+    /// Retrieves the list of submissions for a specific contest stage and streams them to the response stream.
+    /// </summary>
+    /// <param name="request">The request object containing details such as the ContestStageId for which submissions need to be fetched.</param>
+    /// <param name="responseStream">The server stream writer used to send the submissions back to the client in a streamed fashion.</param>
+    /// <param name="context">The context of the server call, used to monitor for cancellation or access other gRPC metadata.</param>
+    /// <returns>A Task that represents the asynchronous operation of streaming submissions to the response stream.</returns>
     public override async Task GetSubmissions(GetSubmissionsRequest request,
                                               IServerStreamWriter<Submission> responseStream,
                                               ServerCallContext context)
@@ -39,6 +50,12 @@ public class SubmissionServiceImpl(ContestClient client, ITransferUtility transf
         } while (processed < submissions?.Count);
     }
 
+    /// <summary>
+    /// Retrieves a detailed full report of a specific submission for a given contest stage.
+    /// </summary>
+    /// <param name="request">The request object containing the ContestStageId and SubmissionId to identify the specific submission.</param>
+    /// <param name="context">The context of the server call, providing cancellation tokens and metadata related to the gRPC request.</param>
+    /// <returns>A Task that represents the asynchronous operation, returning a detailed SubmissionFullReport object containing the IP address and test details of the submission.</returns>
     public override async Task<SubmissionFullReport> GetSubmissionFullReport(GetSubmissionFullReportRequest request, ServerCallContext context)
     {
         var runReport = await client.Contests[request.ContestStageId]
@@ -56,6 +73,12 @@ public class SubmissionServiceImpl(ContestClient client, ITransferUtility transf
         };
     }
 
+    /// <summary>
+    /// Downloads the source code of a specific submission from Yandex.Contest and uploads it to the specified storage service.
+    /// </summary>
+    /// <param name="request">The request object containing the ContestStageId and SubmissionId for which the source needs to be fetched.</param>
+    /// <param name="context">The server call context, used to manage metadata and monitor for cancellation.</param>
+    /// <returns>A task representing the asynchronous operation, returning a response containing the file name of the uploaded submission.</returns>
     public override async Task<DownloadSubmissionSourceResponse> DownloadSubmissionSource(DownloadSubmissionSourceRequest request, ServerCallContext context)
     {
         var headersInspectionHandlerOption = new HeadersInspectionHandlerOption
@@ -90,6 +113,12 @@ public class SubmissionServiceImpl(ContestClient client, ITransferUtility transf
         };
     }
 
+    /// <summary>
+    /// Triggers a rejudging operation for a specific submission identified by its SubmissionId.
+    /// </summary>
+    /// <param name="request">The request object containing the SubmissionId of the submission to be rejudged.</param>
+    /// <param name="context">The context of the server call, providing metadata and monitoring for cancellation requests.</param>
+    /// <returns>A Task representing the asynchronous operation, which completes when the rejudging request has been successfully initiated.</returns>
     public override async Task<Empty> RejudgeSubmission(RejudgeSubmissionRequest request, ServerCallContext context)
     {
         await client.Submissions[request.SubmissionId].Rejudge.PostAsync();
