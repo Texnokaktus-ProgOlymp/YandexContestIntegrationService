@@ -130,8 +130,10 @@ file static class MappingExtensions
         };
 
     private static Verdict MapVerdict(this string? verdictString) =>
-        Enum.TryParse(typeof(Verdict), verdictString, true, out var result)
-     && result is Verdict verdict
-            ? verdict
-            : Verdict.Unknown;
+        string.IsNullOrWhiteSpace(verdictString)
+            ? Verdict.Pending
+            : Enum.TryParse(typeof(Verdict), verdictString, true, out var result)
+           && result is Verdict verdict
+                ? verdict
+                : Verdict.Unknown;
 }
