@@ -89,6 +89,12 @@ public class SubmissionServiceImpl(ContestClient client, ITransferUtility transf
             FileName = key
         };
     }
+
+    public override async Task<Empty> RejudgeSubmission(RejudgeSubmissionRequest request, ServerCallContext context)
+    {
+        await client.Submissions[request.SubmissionId].Rejudge.PostAsync();
+        return new();
+    }
 }
 
 file static class MappingExtensions
