@@ -12,6 +12,7 @@ using ContestStandingsTitle = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.Yandex
 using ContestStatistics = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStatistics;
 using ContestType = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestType;
 using ParticipantInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantInfo;
+using ParticipantStatus = YandexContestClient.Client.Models.ParticipantStatus;
 using ProblemResult = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ProblemResult;
 using Statement = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Statement;
 using SubmitInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.SubmitInfo;
@@ -30,10 +31,11 @@ public class ContestDataServiceImpl(ContestClient contestClient) : ContestDataSe
     public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
     {
         var contestDescription = await contestClient.Contests[request.ContestId].GetAsync();
+        var participantStatus = await contestClient.Contests[request.ContestId].Participation.GetAsync();
 
         return new()
         {
-            Result = contestDescription?.MapContestDescription()
+            Result = contestDescription?.MapContestDescription(participantStatus)
         };
     }
 
@@ -154,7 +156,7 @@ file static class MappingExtensions
                 _               => SubmissionStatus.Other
             },
             SubmissionCount = int.TryParse(problemResult.SubmissionCount, out var result) ? result : 0,
-            SubmitDelay = TimeSpan.FromSeconds(problemResult.SubmitDelay ?? 0L).ToDuration()
+            SubmitDelay = problemResult.SubmitDelay.ToDuration()
         };
 
     private static ContestStatistics MapContestStatistics(this YandexContestClient.Client.Models.ContestStatistics contestStatistics) =>
@@ -170,7 +172,7 @@ file static class MappingExtensions
             ParticipantId = submitInfo.ParticipantId ?? 0L,
             ParticipantName = submitInfo.ParticipantName,
             ProblemTitle = submitInfo.ProblemTitle,
-            SubmitTime = TimeSpan.FromMilliseconds(submitInfo.SubmitTime ?? 0L).ToDuration()
+            SubmitTime = submitInfo.SubmitTime.ToDuration()
         };
 
     private static ContestStandingsTitle MapContestStandingsTitle(this YandexContestClient.Client.Models.ContestStandingsTitle contestStandingsTitle) =>
@@ -180,17 +182,13 @@ file static class MappingExtensions
             Title = contestStandingsTitle.Title
         };
 
-    public static ContestDescription MapContestDescription(this YandexContestClient.Client.Models.ContestDescription contestDescription) =>
+    public static ContestDescription MapContestDescription(this YandexContestClient.Client.Models.ContestDescription contestDescription, ParticipantStatus? participantStatus) =>
         new()
         {
             Name = contestDescription.Name,
-            StartTime = DateTime.TryParse(contestDescription.StartTime, out var dateTime)
-                            ? dateTime.ToTimestamp()
-                            : null,
+            StartTime = contestDescription.StartTime.ToTimestamp(),
+            FinishTime = participantStatus?.ContestFinishTime.ToTimestamp(),
             Duration = contestDescription.Duration is { } duration ? TimeSpan.FromSeconds(duration).ToDuration() : null,
-            FreezeTime = contestDescription.FreezeTime is { } freezeTimeSeconds
-                             ? TimeSpan.FromSeconds(freezeTimeSeconds).ToDuration()
-                             : null,
             Type = contestDescription.Type.MapContestType(),
             UpsolvingAllowance = contestDescription.UpsolvingAllowance.MapUpsolvingAllowance()
         };
@@ -213,4 +211,26 @@ file static class MappingExtensions
             null                                                                   => throw new ArgumentNullException(nameof(upsolvingAllowance)),
             _                                                                      => throw new ArgumentOutOfRangeException(nameof(upsolvingAllowance), upsolvingAllowance, "Invalid upsolving allowance type")
         };
+
+    /// <summary>
+    /// Converts a nullable duration in milliseconds into a Protobuf Duration object.
+    /// If the input is null, returns null.
+    /// </summary>
+    /// <param name="durationMilliseconds">The nullable duration in milliseconds to convert.</param>
+    /// <returns>A Protobuf Duration object representing the input duration, or null if the input is null.</returns>
+    private static Duration? ToDuration(this long? durationMilliseconds) =>
+        durationMilliseconds.HasValue
+            ? TimeSpan.FromMilliseconds(durationMilliseconds.Value).ToDuration()
+            : null;
+
+    /// <summary>
+    /// Converts a date and time string to a Protobuf Timestamp object.
+    /// If the input string is not in a valid date and time format, returns null.
+    /// </summary>
+    /// <param name="dateTimeString">The date and time string to convert.</param>
+    /// <returns>A Protobuf Timestamp object representing the parsed date and time, or null if parsing fails.</returns>
+    private static Timestamp? ToTimestamp(this string? dateTimeString) =>
+        DateTimeOffset.TryParse(dateTimeString, out var result)
+            ? result.ToTimestamp()
+            : null;
 }
