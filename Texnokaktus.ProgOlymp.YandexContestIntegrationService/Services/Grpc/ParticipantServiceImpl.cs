@@ -14,7 +14,7 @@ public class ParticipantServiceImpl(ContestClient contestClient, IParticipantSer
 {
     public override async Task<ParticipantStatusResponse> GetParticipantStatus(ParticipantStatusRequest request, ServerCallContext context)
     {
-        var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantLogin);
+        var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantId, request.ParticipantLogin);
 
         var participantStatus = await contestClient.Contests[request.ContestId].Participants[contestUserId].GetAsync();
 
@@ -26,7 +26,7 @@ public class ParticipantServiceImpl(ContestClient contestClient, IParticipantSer
 
     public override async Task<ParticipantStatsResponse> GetParticipantStats(ParticipantStatsRequest request, ServerCallContext context)
     {
-        var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantLogin);
+        var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantId, request.ParticipantLogin);
 
         var stats = await contestClient.Contests[request.ContestId].Participants[contestUserId].Stats.GetAsync();
 
@@ -36,8 +36,8 @@ public class ParticipantServiceImpl(ContestClient contestClient, IParticipantSer
         };
     }
 
-    private async Task<long> GetContestParticipantAsync(long contestId, string participantLogin) =>
-        await participantService.GetContestUserIdAsync(contestId, participantLogin)
+    private async Task<long> GetContestParticipantAsync(long contestId, int participantId, string participantLogin) =>
+        await participantService.GetContestUserIdAsync(contestId, participantId, participantLogin)
      ?? throw new RpcException(new(StatusCode.NotFound, "Contest participant not found"));
 }
 

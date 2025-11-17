@@ -11,7 +11,11 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     {
         modelBuilder.Entity<ContestUser>(builder =>
         {
-            builder.HasKey(user => new { user.ContestStageId, user.YandexIdLogin });
+            builder.HasKey(user => user.ParticipantId);
+            builder.HasAlternateKey(user => new { user.ContestStageId, user.ParticipantId });
+            builder.HasAlternateKey(user => new { user.ContestStageId, user.YandexIdLogin });
+
+            builder.Property(user => user.ParticipantId).ValueGeneratedNever();
         });
 
         base.OnModelCreating(modelBuilder);

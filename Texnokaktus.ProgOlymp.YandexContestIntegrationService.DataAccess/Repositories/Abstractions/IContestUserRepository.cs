@@ -9,5 +9,6 @@ public interface IContestUserRepository
     void Add(ContestUserInsertModel model);
     Task DeleteAsync(ContestUserDeleteModel model);
     Task<ContestUser?> GetAsync(long contestStageId, string yandexIdLogin);
+    Task<ContestUser?> GetAsync(long contestStageId, int participantId);
     Task<IList<ContestUser>> GetAllAsync();
 }
