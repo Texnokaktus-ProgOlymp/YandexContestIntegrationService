@@ -39,8 +39,7 @@ builder.Services
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
-builder.Services.AddTexnokaktusOpenTelemetry(builder.Configuration,
-                                             "YandexContestIntegrationService",
+builder.Services.AddTexnokaktusOpenTelemetry("YandexContestIntegrationService",
                                              providerBuilder => providerBuilder.AddSource("Microsoft.Kiota.Http.HttpClientLibrary"),
                                              null);
 
@@ -49,8 +48,6 @@ builder.Services
        .PersistKeysToStackExchangeRedis(connectionMultiplexer);
 
 var app = builder.Build();
-
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 if (app.Environment.IsDevelopment())
 {
