@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace YandexOAuthClient;
 
-public record TokenResponse
+internal record TokenResponse
 {
     [JsonPropertyName("token_type")]
     public string TokenType { get; set; }

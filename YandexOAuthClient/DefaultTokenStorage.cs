@@ -4,16 +4,16 @@ namespace YandexOAuthClient;
 
 public class DefaultTokenStorage : ITokenStorage
 {
-    private readonly ConcurrentDictionary<string, TokenResponse> _storage = new();
+    private static readonly ConcurrentDictionary<string, TokenSet> Storage = new();
     
-    public Task StoreAccessTokenAsync(string key, TokenResponse tokenResponse)
+    public Task StoreAccessTokenAsync(string key, TokenSet tokenSet)
     {
-        _storage.AddOrUpdate(key, tokenResponse, (_, _) => tokenResponse);
+        Storage.AddOrUpdate(key, tokenSet, (_, _) => tokenSet);
         return Task.CompletedTask;
     }
 
-    public Task<TokenResponse?> GetAccessTokenAsync(string key) =>
-        _storage.TryGetValue(key, out var value)
-            ? Task.FromResult<TokenResponse?>(value)
-            : Task.FromResult<TokenResponse?>(null);
+    public Task<TokenSet?> GetAccessTokenAsync(string key) =>
+        Storage.TryGetValue(key, out var value)
+            ? Task.FromResult<TokenSet?>(value)
+            : Task.FromResult<TokenSet?>(null);
 }

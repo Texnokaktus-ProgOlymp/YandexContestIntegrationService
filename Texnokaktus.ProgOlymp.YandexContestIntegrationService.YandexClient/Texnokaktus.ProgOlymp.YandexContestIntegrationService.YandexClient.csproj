@@ -12,6 +12,6 @@
     <PackageReference Include="YandexContestClient" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options.csproj" />
+    <ProjectReference Include="..\YandexOAuthClient\YandexOAuthClient.csproj" />
   </ItemGroup>
 </Project>

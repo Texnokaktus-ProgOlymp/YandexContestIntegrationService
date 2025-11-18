@@ -8,9 +8,9 @@ using Texnokaktus.ProgOlymp.OpenTelemetry;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.HealthChecks;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Options;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient;
+using YandexOAuthClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,8 +18,8 @@ builder.Services
        .AddLogicLayerServices()
        .AddDataAccess(optionsBuilder => optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultDb"))
                                                       .EnableSensitiveDataLogging(builder.Environment.IsDevelopment()))
-       .AddServiceOptions()
-       .AddYandexClientServices();
+       .AddYandexClientServices()
+       .AddOAuthClient();
 
 var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(builder.Configuration.GetConnectionString("DefaultRedis")!);
 builder.Services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);

@@ -12,10 +12,14 @@ public static class DiExtensions
 
             services.AddOptions<YandexAppParameters>().BindConfiguration(configSection);
 
+            services.AddScoped<IAuthService, AuthService>();
+
             return services;
         }
 
-        public IServiceCollection AddTokenStorage<TTokenStorage>() where TTokenStorage : class, ITokenStorage =>
+        public IServiceCollection StoreWith<TTokenStorage>() where TTokenStorage : class, ITokenStorage =>
             services.AddScoped<ITokenStorage, TTokenStorage>();
+
+        public IServiceCollection StoreInMemory() => services.StoreWith<DefaultTokenStorage>();
     }
 }
