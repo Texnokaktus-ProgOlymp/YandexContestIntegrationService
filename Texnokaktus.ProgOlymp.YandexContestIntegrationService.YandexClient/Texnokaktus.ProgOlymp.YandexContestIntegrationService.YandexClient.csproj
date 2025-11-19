@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="RestSharp" />
     <PackageReference Include="YandexContestClient" />
-    <PackageReference Include="YandexOAuthClient" />
+    <PackageReference Include="YandexOAuthClient.TokenStorage.Decorators.DataProtection" />
+    <PackageReference Include="YandexOAuthClient.TokenStorage.DistributedCache" />
   </ItemGroup>
 </Project>

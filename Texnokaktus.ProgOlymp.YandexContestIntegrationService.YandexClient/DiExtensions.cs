@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Authentication;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services;
 using YandexContestClient;
 using YandexOAuthClient;
+using YandexOAuthClient.TokenStorage.Decorators.DataProtection;
+using YandexOAuthClient.TokenStorage.DistributedCache;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient;
 
@@ -15,7 +16,7 @@ public static class DiExtensions
                 .WithObservability();
 
         services.AddOAuthClient()
-                .WithTokenStorage<CacheTokenStorage>(configurator => configurator.WithDecorator<EncryptedStorageDecorator>());
+                .WithDistributedCacheStorage(configurator => configurator.ProtectStorage());
 
         return services;
     }
