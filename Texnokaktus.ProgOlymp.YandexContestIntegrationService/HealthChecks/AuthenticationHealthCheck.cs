@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
+using YandexOAuthClient.Abstractions;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.HealthChecks;
 
-public class AuthenticationHealthCheck(ITokenService tokenService) : IHealthCheck
+public class AuthenticationHealthCheck(IAuthService tokenService) : IHealthCheck
 {
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken) =>
-        await tokenService.GetAccessTokenAsync() != null
+        await tokenService.GetAccessTokenAsync("DEFAULT") != null
             ? HealthCheckResult.Healthy("Access token persists")
             : HealthCheckResult.Unhealthy("Application is unauthenticated");
 }

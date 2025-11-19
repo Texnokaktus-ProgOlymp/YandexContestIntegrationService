@@ -1,13 +1,35 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Authentication;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
+using YandexContestClient;
+using YandexOAuthClient;
+using YandexOAuthClient.TokenStorage.Decorators.DataProtection;
+using YandexOAuthClient.TokenStorage.DistributedCache;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
 
 public static class DiExtensions
 {
-    public static IServiceCollection AddLogicLayerServices(this IServiceCollection services) =>
-        services.AddScoped<IRegistrationService, RegistrationService>()
-                .AddScoped<IParticipantService, ParticipantService>()
-                .Decorate<IParticipantService, ParticipantServiceCachingDecorator>();
+    extension(IServiceCollection services)
+    {
+        public IServiceCollection AddLogicLayerServices() =>
+            services.AddScoped<IRegistrationService, RegistrationService>()
+                    .AddScoped<IParticipantService, ParticipantService>()
+                    .Decorate<IParticipantService, ParticipantServiceCachingDecorator>();
+
+        public IServiceCollection AddYandexClientServices()
+        {
+            services.AddYandexContestClient()
+                    .AuthenticateWithTokenProvider<TokenProvider>()
+                    .WithObservability();
+
+            services.AddOAuthClient()
+                    .WithDistributedCacheStorage(configurator => configurator.ProtectStorage());
+
+            return services;
+        }
+    }
 }
+
+

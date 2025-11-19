@@ -2,10 +2,8 @@ using System.Globalization;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 using YandexContestClient.Client;
 using YandexContestClient.Client.Models;
-using BriefRunReport = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.BriefRunReport;
 using CompilerLimit = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.CompilerLimit;
 using ContestDescription = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestDescription;
 using ContestProblem = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestProblem;
@@ -14,8 +12,7 @@ using ContestStandingsTitle = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.Yandex
 using ContestStatistics = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStatistics;
 using ContestType = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestType;
 using ParticipantInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantInfo;
-using ParticipantStats = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantStats;
-using ParticipantStatus = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantStatus;
+using ParticipantStatus = YandexContestClient.Client.Models.ParticipantStatus;
 using ProblemResult = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ProblemResult;
 using Statement = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Statement;
 using SubmitInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.SubmitInfo;
@@ -23,7 +20,7 @@ using UpsolvingAllowance = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexCon
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class ContestDataServiceImpl(ContestClient contestClient, IParticipantService participantService) : ContestDataService.ContestDataServiceBase
+public class ContestDataServiceImpl(ContestClient contestClient) : ContestDataService.ContestDataServiceBase
 {
     public override Task<GetContestUrlResponse> GetContestUrl(GetContestUrlRequest request, ServerCallContext context) =>
         Task.FromResult<GetContestUrlResponse>(new()
@@ -34,10 +31,11 @@ public class ContestDataServiceImpl(ContestClient contestClient, IParticipantSer
     public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
     {
         var contestDescription = await contestClient.Contests[request.ContestId].GetAsync();
+        var participantStatus = await contestClient.Contests[request.ContestId].Participation.GetAsync();
 
         return new()
         {
-            Result = contestDescription?.MapContestDescription()
+            Result = contestDescription?.MapContestDescription(participantStatus)
         };
     }
 
@@ -68,34 +66,6 @@ public class ContestDataServiceImpl(ContestClient contestClient, IParticipantSer
             Result = contestStandings?.MapContestStandings()
         };
     }
-
-    public override async Task<ParticipantStatusResponse> GetParticipantStatus(ParticipantStatusRequest request, ServerCallContext context)
-    {
-        var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantLogin);
-
-        var participantStatus = await contestClient.Contests[request.ContestId].Participants[contestUserId].GetAsync();
-
-        return new()
-        {
-            Result = participantStatus?.MapParticipationStatus()
-        };
-    }
-
-    public override async Task<ParticipantStatsResponse> GetParticipantStats(ParticipantStatsRequest request, ServerCallContext context)
-    {
-        var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantLogin);
-
-        var stats = await contestClient.Contests[request.ContestId].Participants[contestUserId].Stats.GetAsync();
-
-        return new()
-        {
-            Result = stats?.MapParticipantStats()
-        };
-    }
-
-    private async Task<long> GetContestParticipantAsync(long contestId, string participantLogin) =>
-        await participantService.GetContestUserIdAsync(contestId, participantLogin)
-     ?? throw new RpcException(new(StatusCode.NotFound, "Contest participant not found"));
 }
 
 file static class MappingExtensions
@@ -128,7 +98,7 @@ file static class MappingExtensions
         {
             Locale = statement.Locale,
             Path = statement.Path,
-            Type = statement.Type.MapStatementType() 
+            Type = statement.Type.MapStatementType()
         };
 
     private static StatementType MapStatementType(this Statement_type? statementType) =>
@@ -186,7 +156,7 @@ file static class MappingExtensions
                 _               => SubmissionStatus.Other
             },
             SubmissionCount = int.TryParse(problemResult.SubmissionCount, out var result) ? result : 0,
-            SubmitDelay = TimeSpan.FromSeconds(problemResult.SubmitDelay ?? 0L).ToDuration()
+            SubmitDelay = problemResult.SubmitDelay.ToDuration()
         };
 
     private static ContestStatistics MapContestStatistics(this YandexContestClient.Client.Models.ContestStatistics contestStatistics) =>
@@ -202,7 +172,7 @@ file static class MappingExtensions
             ParticipantId = submitInfo.ParticipantId ?? 0L,
             ParticipantName = submitInfo.ParticipantName,
             ProblemTitle = submitInfo.ProblemTitle,
-            SubmitTime = TimeSpan.FromMilliseconds(submitInfo.SubmitTime ?? 0L).ToDuration()
+            SubmitTime = submitInfo.SubmitTime.ToDuration()
         };
 
     private static ContestStandingsTitle MapContestStandingsTitle(this YandexContestClient.Client.Models.ContestStandingsTitle contestStandingsTitle) =>
@@ -212,32 +182,13 @@ file static class MappingExtensions
             Title = contestStandingsTitle.Title
         };
 
-    public static ParticipantStatus MapParticipationStatus(this YandexContestClient.Client.Models.ParticipantStatus participantStatus) =>
-        new()
-        {
-            Name = participantStatus.ParticipantName,
-            StartTime = DateTimeOffset.TryParse(participantStatus.ParticipantStartTime, out var startTime) ? startTime.ToTimestamp() : null,
-            FinishTime = DateTimeOffset.TryParse(participantStatus.ParticipantFinishTime, out var finishTime) ? finishTime.ToTimestamp() : null,
-            LeftTimeMilliseconds = participantStatus.ParticipantLeftTimeMillis ?? 0,
-            State = participantStatus.ContestState.MapParticipationState()
-        };
-
-    private static ParticipationState MapParticipationState(this ParticipantStatus_contestState? participationState) =>
-        participationState switch
-        {
-            ParticipantStatus_contestState.IN_PROGRESS => ParticipationState.InProgress,
-            ParticipantStatus_contestState.FINISHED    => ParticipationState.Finished,
-            ParticipantStatus_contestState.NOT_STARTED => ParticipationState.NotStarted,
-            _                                          => throw new ArgumentOutOfRangeException(nameof(participationState), participationState, null)
-        };
-
-    public static ContestDescription MapContestDescription(this YandexContestClient.Client.Models.ContestDescription contestDescription) =>
+    public static ContestDescription MapContestDescription(this YandexContestClient.Client.Models.ContestDescription contestDescription, ParticipantStatus? participantStatus) =>
         new()
         {
             Name = contestDescription.Name,
-            StartTime = DateTime.TryParse(contestDescription.StartTime, out var dateTime) ? dateTime.ToTimestamp() : null,
+            StartTime = contestDescription.StartTime.ToTimestamp(),
+            FinishTime = participantStatus?.ContestFinishTime.ToTimestamp(),
             Duration = contestDescription.Duration is { } duration ? TimeSpan.FromSeconds(duration).ToDuration() : null,
-            FreezeTime = contestDescription.FreezeTime is { } freezeTimeSeconds ? TimeSpan.FromSeconds(freezeTimeSeconds).ToDuration() : null,
             Type = contestDescription.Type.MapContestType(),
             UpsolvingAllowance = contestDescription.UpsolvingAllowance.MapUpsolvingAllowance()
         };
@@ -261,27 +212,25 @@ file static class MappingExtensions
             _                                                                      => throw new ArgumentOutOfRangeException(nameof(upsolvingAllowance), upsolvingAllowance, "Invalid upsolving allowance type")
         };
 
-    public static ParticipantStats MapParticipantStats(this YandexContestClient.Client.Models.ParticipantStats stats) =>
-        new()
-        {
-            StartedAt = DateTimeOffset.TryParse(stats.StartedAt, out var startedAt) ? startedAt.ToTimestamp() : null,
-            FirstSubmissionTime = DateTimeOffset.TryParse(stats.FirstSubmissionTime, out var firstSubmissionTime) ? firstSubmissionTime.ToTimestamp() : null,
-            Runs = { stats.Runs?.Select(run => run.MapBriefRunReport()) }
-        };
+    /// <summary>
+    /// Converts a nullable duration in milliseconds into a Protobuf Duration object.
+    /// If the input is null, returns null.
+    /// </summary>
+    /// <param name="durationMilliseconds">The nullable duration in milliseconds to convert.</param>
+    /// <returns>A Protobuf Duration object representing the input duration, or null if the input is null.</returns>
+    private static Duration? ToDuration(this long? durationMilliseconds) =>
+        durationMilliseconds.HasValue
+            ? TimeSpan.FromMilliseconds(durationMilliseconds.Value).ToDuration()
+            : null;
 
-    private static BriefRunReport MapBriefRunReport(this YandexContestClient.Client.Models.BriefRunReport run) =>
-        new()
-        {
-            RunId = run.RunId ?? 0L,
-            ProblemId = run.ProblemId,
-            ProblemAlias = run.ProblemAlias,
-            Compiler = run.Compiler,
-            SubmissionTime = DateTimeOffset.TryParse(run.SubmissionTime, out var x) ? x.ToTimestamp() : null,
-            TimeFromStart = TimeSpan.FromMilliseconds(run.TimeFromStart ?? 0L).ToDuration(),
-            Verdict = run.Verdict,
-            TestNumber = run.TestNumber ?? 0,
-            MaxTimeUsage = run.MaxTimeUsage ?? 0L,
-            MaxMemoryUsage = run.MaxMemoryUsage ?? 0L,
-            Score = run.Score
-        };
+    /// <summary>
+    /// Converts a date and time string to a Protobuf Timestamp object.
+    /// If the input string is not in a valid date and time format, returns null.
+    /// </summary>
+    /// <param name="dateTimeString">The date and time string to convert.</param>
+    /// <returns>A Protobuf Timestamp object representing the parsed date and time, or null if parsing fails.</returns>
+    private static Timestamp? ToTimestamp(this string? dateTimeString) =>
+        DateTimeOffset.TryParse(dateTimeString, out var result)
+            ? result.ToTimestamp()
+            : null;
 }

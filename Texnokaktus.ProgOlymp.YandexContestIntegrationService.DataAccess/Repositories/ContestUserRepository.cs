@@ -17,6 +17,7 @@ internal class ContestUserRepository(AppDbContext context) : IContestUserReposit
     {
         var entity = new ContestUser
         {
+            ParticipantId = model.ParticipantId,
             ContestStageId = model.ContestStageId,
             YandexIdLogin = model.YandexIdLogin,
             ContestUserId = model.ContestUserId
@@ -27,7 +28,7 @@ internal class ContestUserRepository(AppDbContext context) : IContestUserReposit
     public async Task DeleteAsync(ContestUserDeleteModel model) =>
         await context.ContestUsers
                      .Where(contestUser => contestUser.ContestStageId == model.ContestStageId
-                                        && contestUser.YandexIdLogin == model.YandexIdLogin)
+                                        && contestUser.ParticipantId == model.participantId)
                      .ExecuteDeleteAsync();
 
     public async Task<ContestUser?> GetAsync(long contestStageId, string yandexIdLogin) =>
@@ -36,6 +37,12 @@ internal class ContestUserRepository(AppDbContext context) : IContestUserReposit
                      .Where(user => user.ContestStageId == contestStageId
                                  && user.YandexIdLogin == yandexIdLogin)
                      .FirstOrDefaultAsync();
+
+    public Task<ContestUser?> GetAsync(long contestStageId, int participantId) =>
+        context.ContestUsers.AsNoTracking()
+               .Where(user => user.ContestStageId == contestStageId
+                           && user.ParticipantId == participantId)
+               .FirstOrDefaultAsync();
 
     public async Task<IList<ContestUser>> GetAllAsync() =>
         await context.ContestUsers

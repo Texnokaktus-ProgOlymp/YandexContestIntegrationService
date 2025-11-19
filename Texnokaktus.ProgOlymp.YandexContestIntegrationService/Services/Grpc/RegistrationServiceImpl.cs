@@ -12,12 +12,8 @@ public class RegistrationServiceImpl(IRegistrationService registrationService, I
     {
         try
         {
-            await registrationService.RegisterUserAsync(request.ContestStageId, request.YandexIdLogin, request.DisplayName);
+            await registrationService.RegisterUserAsync(request.ContestStageId, request.YandexIdLogin, request.DisplayName, request.ParticipantId);
             return new();
-        }
-        catch (InvalidYandexUserException e)
-        {
-            throw new RpcException(new(StatusCode.InvalidArgument, e.Message, e));
         }
         catch (Exception e)
         {
@@ -30,7 +26,7 @@ public class RegistrationServiceImpl(IRegistrationService registrationService, I
     {
         try
         {
-            await registrationService.UnregisterUserAsync(request.ContestStageId, request.YandexIdLogin);
+            await registrationService.UnregisterUserAsync(request.ContestStageId, request.ParticipantId);
             return new();
         }
         catch (UserIsNotRegisteredException e)

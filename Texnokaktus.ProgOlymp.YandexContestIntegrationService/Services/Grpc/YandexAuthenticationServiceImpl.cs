@@ -1,15 +1,15 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services.Abstractions;
+using YandexOAuthClient.Abstractions;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class YandexAuthenticationServiceImpl(ITokenService tokenService, IYandexAuthenticationService yandexAuthenticationService) : YandexAuthenticationService.YandexAuthenticationServiceBase
+public class YandexAuthenticationServiceImpl(IAuthService authService) : YandexAuthenticationService.YandexAuthenticationServiceBase
 {
     public override async Task<IsServiceAuthenticatedResponse> IsServiceAuthenticated(Empty request, ServerCallContext context)
     {
-        var token = await tokenService.GetAccessTokenAsync();
+        var token = await authService.GetAccessTokenAsync("DEFAULT");
 
         return new()
         {
@@ -20,13 +20,12 @@ public class YandexAuthenticationServiceImpl(ITokenService tokenService, IYandex
     public override Task<GetOAuthUrlResponse> GetOAuthUrl(GetOAuthUrlRequest request, ServerCallContext context) =>
         Task.FromResult<GetOAuthUrlResponse>(new()
         {
-            Result = yandexAuthenticationService.GetYandexOAuthUrl(request.RedirectUrl)
+            Result = authService.GetOAuthUrl(request.RedirectUrl)
         });
 
     public override async Task<Empty> AuthenticateService(AuthenticateServiceRequest request, ServerCallContext context)
     {
-        var tokenResponse = await yandexAuthenticationService.GetAccessTokenAsync(request.Code);
-        await tokenService.RegisterTokenAsync(tokenResponse);
+        await authService.AuthorizeAsync("DEFAULT", request.Code);
 
         return new();
     }
