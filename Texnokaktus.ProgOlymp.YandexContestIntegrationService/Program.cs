@@ -9,7 +9,6 @@ using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.HealthChecks;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient;
 using YandexOAuthClient;
 
 var builder = WebApplication.CreateBuilder(args);

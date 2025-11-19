@@ -1,4 +1,4 @@
-namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Exceptions;
+namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Exceptions;
 
 public class YandexApiException : Exception
 {

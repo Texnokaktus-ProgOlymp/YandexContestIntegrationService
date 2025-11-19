@@ -15,10 +15,6 @@ public class RegistrationServiceImpl(IRegistrationService registrationService, I
             await registrationService.RegisterUserAsync(request.ContestStageId, request.YandexIdLogin, request.DisplayName, request.ParticipantId);
             return new();
         }
-        catch (InvalidYandexUserException e)
-        {
-            throw new RpcException(new(StatusCode.InvalidArgument, e.Message, e));
-        }
         catch (Exception e)
         {
             logger.LogError(e, "An error occurred while registering the user to the contest");

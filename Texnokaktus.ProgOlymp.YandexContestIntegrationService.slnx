@@ -4,6 +4,5 @@
   </Folder>
   <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj" />
   <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj" />
-  <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient\Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.csproj" />
   <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService\Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" />
 </Solution>

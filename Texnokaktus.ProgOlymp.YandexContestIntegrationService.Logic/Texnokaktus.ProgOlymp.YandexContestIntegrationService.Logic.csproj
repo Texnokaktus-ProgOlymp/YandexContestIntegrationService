@@ -7,11 +7,10 @@
   <ItemGroup>
     <ProjectReference Include="..\modules\Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts.csproj" />
     <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj" />
-    <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient\Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Services\ApplicationService.cs" />
-    <Compile Remove="Services\Abstractions\IApplicationStateService.cs" />
-    <Compile Remove="Services\Abstractions\IApplicationService.cs" />
+    <PackageReference Include="YandexContestClient" />
+    <PackageReference Include="YandexOAuthClient.TokenStorage.Decorators.DataProtection" />
+    <PackageReference Include="YandexOAuthClient.TokenStorage.DistributedCache" />
   </ItemGroup>
 </Project>
