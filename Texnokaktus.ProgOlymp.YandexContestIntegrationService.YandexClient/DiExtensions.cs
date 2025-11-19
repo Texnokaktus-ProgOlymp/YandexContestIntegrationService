@@ -14,8 +14,9 @@ public static class DiExtensions
                 .AuthenticateWithTokenProvider<TokenProvider>()
                 .WithObservability();
 
-        return services.AddOAuthClient()
-                       .StoreWith<CacheTokenStorage>()
-                       .UseStorageDecorator<EncryptedStorageDecorator>();
+        services.AddOAuthClient()
+                .WithTokenStorage<CacheTokenStorage>(configurator => configurator.WithDecorator<EncryptedStorageDecorator>());
+
+        return services;
     }
 }

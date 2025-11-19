@@ -10,8 +10,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="RestSharp" />
     <PackageReference Include="YandexContestClient" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\YandexOAuthClient\YandexOAuthClient.csproj" />
+    <PackageReference Include="YandexOAuthClient" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using YandexOAuthClient;
+using YandexOAuthClient.Abstractions;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services;
 

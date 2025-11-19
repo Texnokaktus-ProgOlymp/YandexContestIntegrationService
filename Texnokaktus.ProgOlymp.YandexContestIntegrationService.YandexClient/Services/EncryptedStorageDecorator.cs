@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.DataProtection;
 using YandexOAuthClient;
+using YandexOAuthClient.Abstractions;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Services;
 

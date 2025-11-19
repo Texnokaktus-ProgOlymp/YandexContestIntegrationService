@@ -1,5 +1,5 @@
 using Microsoft.Kiota.Abstractions.Authentication;
-using YandexOAuthClient;
+using YandexOAuthClient.Abstractions;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.Authentication;
 

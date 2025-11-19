@@ -6,5 +6,4 @@
   <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj" />
   <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient\Texnokaktus.ProgOlymp.YandexContestIntegrationService.YandexClient.csproj" />
   <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService\Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" />
-  <Project Path="YandexOAuthClient/YandexOAuthClient.csproj" />
 </Solution>
