@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace YandexOAuthClient;
 
@@ -17,9 +18,12 @@ public static class DiExtensions
             return services;
         }
 
-        public IServiceCollection StoreWith<TTokenStorage>() where TTokenStorage : class, ITokenStorage =>
+        public IServiceCollection StoreWith<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TTokenStorage>() where TTokenStorage : class, ITokenStorage =>
             services.AddScoped<ITokenStorage, TTokenStorage>();
 
         public IServiceCollection StoreInMemory() => services.StoreWith<DefaultTokenStorage>();
+
+        public IServiceCollection UseStorageDecorator<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TDecorator>() where TDecorator : class, ITokenStorage =>
+            services.Decorate<ITokenStorage, TDecorator>();
     }
 }

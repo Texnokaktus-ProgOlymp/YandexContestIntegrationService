@@ -12,7 +12,7 @@ public static class DiExtensions
     public static IServiceCollection AddYandexClientServices(this IServiceCollection services) =>
         services.AddOAuthClient()
                 .StoreWith<CacheTokenStorage>()
-                .Decorate<ITokenStorage, EncryptedStorageDecorator>()
+                .UseStorageDecorator<EncryptedStorageDecorator>()
                 .AddYandexContestClient()
                 .AddYandexContestAuthentication<TokenProvider>()
                 .AddScoped<ObservabilityOptions>(_ => new());

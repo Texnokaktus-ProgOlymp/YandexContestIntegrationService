@@ -9,7 +9,6 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="RestSharp" />
-    <PackageReference Include="Scrutor" />
     <PackageReference Include="YandexContestClient" />
   </ItemGroup>
   <ItemGroup>
