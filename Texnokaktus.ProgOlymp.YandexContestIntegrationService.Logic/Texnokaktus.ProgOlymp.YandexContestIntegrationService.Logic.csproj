@@ -14,7 +14,4 @@
     <Compile Remove="Services\Abstractions\IApplicationStateService.cs" />
     <Compile Remove="Services\Abstractions\IApplicationService.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Scrutor" />
-  </ItemGroup>
 </Project>
