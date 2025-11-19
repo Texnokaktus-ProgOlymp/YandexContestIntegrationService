@@ -11,6 +11,7 @@ ARG VERSION
 ARG TARGETOS
 ARG TARGETARCH
 WORKDIR /src
+COPY ["Directory.Packages.props", "./"]
 COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService/"]
 COPY ["modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts.csproj", "modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/"]
 COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess/Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess/"]
