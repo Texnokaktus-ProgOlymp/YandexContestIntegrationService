@@ -7,10 +7,10 @@ using Serilog;
 using StackExchange.Redis;
 using Texnokaktus.ProgOlymp.OpenTelemetry;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.HealthChecks;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 using YandexOAuthClient;
+using YandexOAuthClient.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +37,7 @@ builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
 builder.Services
        .AddGrpcHealthChecks()
-       .AddCheck<AuthenticationHealthCheck>(nameof(AuthenticationHealthCheck))
+       .AddAuthenticationHealthCheck(options => options.DefaultTokenKey = "DEFAULT")
        .AddDatabaseHealthChecks();
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));

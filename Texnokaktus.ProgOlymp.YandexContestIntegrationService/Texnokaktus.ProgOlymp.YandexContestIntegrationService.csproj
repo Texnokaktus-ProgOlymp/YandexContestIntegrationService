@@ -25,6 +25,7 @@
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.Seq" />
     <PackageReference Include="Texnokaktus.ProgOlymp.OpenTelemetry" />
+    <PackageReference Include="YandexOAuthClient.Diagnostics.HealthChecks" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\.dockerignore">
