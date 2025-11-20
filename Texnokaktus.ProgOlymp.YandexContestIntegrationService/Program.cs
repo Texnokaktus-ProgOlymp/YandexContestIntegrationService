@@ -1,9 +1,10 @@
 using System.Reflection;
+using Amazon.S3;
+using Amazon.S3.Transfer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using StackExchange.Redis;
-using Texnokaktus.ProgOlymp.Configuration.S3;
 using Texnokaktus.ProgOlymp.OpenTelemetry;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.HealthChecks;
@@ -25,7 +26,10 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
 builder.Services.AddStackExchangeRedisCache(options => options.ConnectionMultiplexerFactory = () => Task.FromResult<IConnectionMultiplexer>(connectionMultiplexer));
 builder.Services.AddMemoryCache();
 
-builder.Services.AddS3();
+builder.Services
+       .AddDefaultAWSOptions(builder.Configuration.GetAWSOptions())
+       .AddAWSService<IAmazonS3>()
+       .AddScoped<ITransferUtility, TransferUtility>();
 
 builder.Services.AddSingleton(TimeProvider.System);
 

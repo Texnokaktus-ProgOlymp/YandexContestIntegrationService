@@ -11,6 +11,8 @@
     <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
+    <PackageReference Include="AWSSDK.S3" />
     <PackageReference Include="Grpc.AspNetCore.HealthChecks" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" />
@@ -22,7 +24,6 @@
     <PackageReference Include="Serilog.Settings.Configuration" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.Seq" />
-    <PackageReference Include="Texnokaktus.ProgOlymp.Configuration.S3" />
     <PackageReference Include="Texnokaktus.ProgOlymp.OpenTelemetry" />
   </ItemGroup>
   <ItemGroup>
