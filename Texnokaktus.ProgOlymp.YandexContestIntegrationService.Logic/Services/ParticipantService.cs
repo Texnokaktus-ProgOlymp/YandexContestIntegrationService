@@ -15,23 +15,6 @@ internal class ParticipantService(AppDbContext context, ContestClient contestCli
                      .Select<ContestUser, long?>(x => x.ContestUserId)
                      .FirstOrDefaultAsync();
 
-    public async Task<long?> GetContestUserIdAsync(long contestStageId, int participantId, string participantLogin)
-    {
-        if (await GetContestUserIdAsync(contestStageId, participantId) is { } contestUserId)
-            return contestUserId;
-
-        var participants = await contestClient.Contests[contestStageId]
-                                              .Participants
-                                              .GetAsync(configuration => configuration.QueryParameters.Login = participantLogin);
-
-        if (participants?.FirstOrDefault(x => x.Login == participantLogin) is not { Id: not null, Login: not null } participantInfo)
-            return null;
-
-        await AddContestParticipantAsync(contestStageId, participantId, participantInfo.Login, participantInfo.Id.Value);
-
-        return participantInfo.Id;
-    }
-
     public async Task AddContestParticipantAsync(long contestStageId, int participantId, string yandexIdLogin, long contestUserId)
     {
         context.ContestUsers.Add(new()
