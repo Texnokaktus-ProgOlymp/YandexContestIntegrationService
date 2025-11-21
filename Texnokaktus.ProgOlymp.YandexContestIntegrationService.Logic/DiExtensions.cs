@@ -15,8 +15,7 @@ public static class DiExtensions
     {
         public IServiceCollection AddLogicLayerServices() =>
             services.AddScoped<IRegistrationService, RegistrationService>()
-                    .AddScoped<IParticipantService, ParticipantService>()
-                    .Decorate<IParticipantService, ParticipantServiceCachingDecorator>();
+                    .AddScoped<IParticipantService, ParticipantService>();
 
         public IServiceCollection AddYandexClientServices()
         {
