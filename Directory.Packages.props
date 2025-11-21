@@ -23,7 +23,7 @@
     <PackageVersion Include="Serilog.Settings.Configuration" Version="9.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.0.0" />
-    <PackageVersion Include="Texnokaktus.ProgOlymp.OpenTelemetry" Version="1.10.1" />
+    <PackageVersion Include="Texnokaktus.ProgOlymp.OpenTelemetry" Version="1.11.1" />
     <PackageVersion Include="YandexContestClient" Version="1.10.1" />
     <PackageVersion Include="YandexOAuthClient.Diagnostics.HealthChecks" Version="1.4.1" />
     <PackageVersion Include="YandexOAuthClient.TokenStorage.Decorators.DataProtection" Version="1.4.1" />
