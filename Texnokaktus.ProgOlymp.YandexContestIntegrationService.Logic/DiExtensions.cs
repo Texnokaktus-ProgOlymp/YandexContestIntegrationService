@@ -23,7 +23,7 @@ public static class DiExtensions
                     .AuthenticateWithTokenProvider<TokenProvider>()
                     .WithObservability();
 
-            services.AddOAuthClient()
+            services.AddStoredOAuthClient<string>()
                     .WithDistributedCacheStorage(configurator => configurator.ProtectStorage());
 
             return services;

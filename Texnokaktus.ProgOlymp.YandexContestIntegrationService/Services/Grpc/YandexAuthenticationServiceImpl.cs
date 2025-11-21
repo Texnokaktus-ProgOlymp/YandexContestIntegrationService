@@ -5,7 +5,7 @@ using YandexOAuthClient.Abstractions;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class YandexAuthenticationServiceImpl(IAuthService authService) : YandexAuthenticationService.YandexAuthenticationServiceBase
+public class YandexAuthenticationServiceImpl(IStoredAuthService<string> authService) : YandexAuthenticationService.YandexAuthenticationServiceBase
 {
     public override async Task<IsServiceAuthenticatedResponse> IsServiceAuthenticated(Empty request, ServerCallContext context)
     {

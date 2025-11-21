@@ -3,7 +3,7 @@ using YandexOAuthClient.Abstractions;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Authentication;
 
-internal class TokenProvider(IAuthService authService) : IAccessTokenProvider
+internal class TokenProvider(IStoredAuthService<string> authService) : IAccessTokenProvider
 {
     public async Task<string> GetAuthorizationTokenAsync(Uri uri,
                                                          Dictionary<string, object>? additionalAuthenticationContext = null,

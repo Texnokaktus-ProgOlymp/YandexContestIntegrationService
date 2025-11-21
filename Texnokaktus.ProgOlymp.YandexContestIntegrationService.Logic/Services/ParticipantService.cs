@@ -2,11 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Context;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.Entities;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
-using YandexContestClient.Client;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services;
 
-internal class ParticipantService(AppDbContext context, ContestClient contestClient) : IParticipantService
+internal class ParticipantService(AppDbContext context) : IParticipantService
 {
     public async Task<long?> GetContestUserIdAsync(long contestStageId, int participantId) =>
         await context.ContestUsers
