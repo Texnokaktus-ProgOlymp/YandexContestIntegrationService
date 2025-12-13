@@ -36,7 +36,7 @@ public class RegistrationServiceImpl(IRegistrationService registrationService, I
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error occurred while registering the user to the contest");
+            logger.LogError(e, "An error occurred while unregistering the user from the contest");
             throw;
         }
     }
