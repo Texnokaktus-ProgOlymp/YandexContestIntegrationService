@@ -1,6 +1,7 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Extensions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 using YandexContestClient.Client;
 using YandexContestClient.Client.Models;
@@ -12,11 +13,24 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
 public class ParticipantServiceImpl(ContestClient contestClient, IParticipantService participantService) : ParticipantService.ParticipantServiceBase
 {
+    public override async Task<ContestParticipantsResponse> GetContestParticipants(ContestParticipantsRequest request, ServerCallContext context)
+    {
+        var participantInfos = await contestClient.Contests[request.ContestId].Participants.GetAsync(cancellationToken: context.CancellationToken);
+
+        return new()
+        {
+            Result =
+            {
+                participantInfos?.Select(info => info.MapParticipantInfo()) ?? []
+            }
+        };
+    }
+
     public override async Task<ParticipantStatusResponse> GetParticipantStatus(ParticipantStatusRequest request, ServerCallContext context)
     {
         var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantId);
 
-        var participantStatus = await contestClient.Contests[request.ContestId].Participants[contestUserId].GetAsync();
+        var participantStatus = await contestClient.Contests[request.ContestId].Participants[contestUserId].GetAsync(cancellationToken: context.CancellationToken);
 
         return new()
         {
@@ -28,7 +42,7 @@ public class ParticipantServiceImpl(ContestClient contestClient, IParticipantSer
     {
         var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantId);
 
-        var stats = await contestClient.Contests[request.ContestId].Participants[contestUserId].Stats.GetAsync();
+        var stats = await contestClient.Contests[request.ContestId].Participants[contestUserId].Stats.GetAsync(cancellationToken: context.CancellationToken);
 
         return new()
         {

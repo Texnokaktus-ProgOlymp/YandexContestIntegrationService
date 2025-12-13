@@ -2,6 +2,7 @@ using System.Globalization;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Extensions;
 using YandexContestClient.Client;
 using YandexContestClient.Client.Models;
 using CompilerLimit = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.CompilerLimit;
@@ -11,7 +12,6 @@ using ContestStandings = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexConte
 using ContestStandingsTitle = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStandingsTitle;
 using ContestStatistics = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStatistics;
 using ContestType = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestType;
-using ParticipantInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantInfo;
 using ParticipantStatus = YandexContestClient.Client.Models.ParticipantStatus;
 using ProblemResult = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ProblemResult;
 using Statement = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Statement;
@@ -130,16 +130,6 @@ file static class MappingExtensions
             Score = double.TryParse(contestStandingsRow.Score, CultureInfo.GetCultureInfo("ru-RU"), out var score)
                         ? score
                         : null
-        };
-
-    private static ParticipantInfo MapParticipantInfo(this YandexContestClient.Client.Models.ParticipantInfo participantInfo) =>
-        new()
-        {
-            Id = participantInfo.Id ?? 0L,
-            Login = participantInfo.Login,
-            Name = participantInfo.Name,
-            StartTime = participantInfo.StartTime,
-            Uid = participantInfo.Uid
         };
 
     private static ProblemResult MapProblemResult(this YandexContestClient.Client.Models.ProblemResult problemResult) =>
