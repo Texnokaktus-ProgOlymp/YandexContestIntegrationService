@@ -1,5 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Texnokaktus.ProgOlymp.Common.Contracts.Exceptions;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Exceptions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
@@ -31,7 +32,7 @@ public class RegistrationServiceImpl(IRegistrationService registrationService, I
         }
         catch (UserIsNotRegisteredException e)
         {
-            throw new RpcException(new(StatusCode.NotFound, e.Message, e));
+            throw new NotFoundException(e.Message, e);
         }
         catch (Exception e)
         {

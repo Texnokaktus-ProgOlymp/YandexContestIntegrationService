@@ -1,5 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Texnokaktus.ProgOlymp.Common.Contracts.Exceptions;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Extensions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
@@ -52,7 +53,7 @@ public class ParticipantServiceImpl(ContestClient contestClient, IParticipantSer
 
     private async Task<long> GetContestParticipantAsync(long contestId, int participantId) =>
         await participantService.GetContestUserIdAsync(contestId, participantId)
-     ?? throw new RpcException(new(StatusCode.NotFound, "Contest participant not found"));
+     ?? throw new NotFoundException("Contest participant not found");
 }
 
 file static class MappingExtensions
