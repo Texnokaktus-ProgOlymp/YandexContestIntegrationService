@@ -1,15 +1,15 @@
 using System.Reflection;
+using Amazon.S3;
+using Amazon.S3.Transfer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using StackExchange.Redis;
-using Texnokaktus.ProgOlymp.Configuration.S3;
 using Texnokaktus.ProgOlymp.OpenTelemetry;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.HealthChecks;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
-using YandexOAuthClient;
+using YandexOAuthClient.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,15 +17,17 @@ builder.Services
        .AddLogicLayerServices()
        .AddDataAccess(optionsBuilder => optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultDb"))
                                                       .EnableSensitiveDataLogging(builder.Environment.IsDevelopment()))
-       .AddYandexClientServices()
-       .AddOAuthClient();
+       .AddYandexClientServices();
 
 var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(builder.Configuration.GetConnectionString("DefaultRedis")!);
 builder.Services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
 builder.Services.AddStackExchangeRedisCache(options => options.ConnectionMultiplexerFactory = () => Task.FromResult<IConnectionMultiplexer>(connectionMultiplexer));
 builder.Services.AddMemoryCache();
 
-builder.Services.AddS3();
+builder.Services
+       .AddDefaultAWSOptions(builder.Configuration.GetAWSOptions())
+       .AddAWSService<IAmazonS3>()
+       .AddScoped<ITransferUtility, TransferUtility>();
 
 builder.Services.AddSingleton(TimeProvider.System);
 
@@ -33,7 +35,7 @@ builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
 builder.Services
        .AddGrpcHealthChecks()
-       .AddCheck<AuthenticationHealthCheck>(nameof(AuthenticationHealthCheck))
+       .AddAuthenticationHealthCheck(options => options.DefaultTokenKey = "DEFAULT")
        .AddDatabaseHealthChecks();
 
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));

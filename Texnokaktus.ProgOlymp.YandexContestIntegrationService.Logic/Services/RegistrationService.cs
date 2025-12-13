@@ -19,7 +19,7 @@ internal class RegistrationService(IParticipantService participantService,
         if (participantDisplayName is not null)
             await SetParticipantDisplayNameAsync(contestStageId, contestUserId, participantDisplayName);
 
-        if (await participantService.GetContestUserIdAsync(contestStageId, participantId, yandexIdLogin) is null)
+        if (await participantService.GetContestUserIdAsync(contestStageId, participantId) is null)
             await participantService.AddContestParticipantAsync(contestStageId, participantId, yandexIdLogin, contestUserId);
     }
 

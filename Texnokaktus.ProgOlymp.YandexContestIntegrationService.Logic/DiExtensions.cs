@@ -15,8 +15,7 @@ public static class DiExtensions
     {
         public IServiceCollection AddLogicLayerServices() =>
             services.AddScoped<IRegistrationService, RegistrationService>()
-                    .AddScoped<IParticipantService, ParticipantService>()
-                    .Decorate<IParticipantService, ParticipantServiceCachingDecorator>();
+                    .AddScoped<IParticipantService, ParticipantService>();
 
         public IServiceCollection AddYandexClientServices()
         {
@@ -24,7 +23,7 @@ public static class DiExtensions
                     .AuthenticateWithTokenProvider<TokenProvider>()
                     .WithObservability();
 
-            services.AddOAuthClient()
+            services.AddStoredOAuthClient<string>()
                     .WithDistributedCacheStorage(configurator => configurator.ProtectStorage());
 
             return services;
