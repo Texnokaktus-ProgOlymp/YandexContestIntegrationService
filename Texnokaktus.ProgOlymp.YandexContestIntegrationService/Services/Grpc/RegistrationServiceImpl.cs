@@ -9,12 +9,14 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
 public class RegistrationServiceImpl(IRegistrationService registrationService, ILogger<RegistrationServiceImpl> logger) : RegistrationService.RegistrationServiceBase
 {
-    public override async Task<Empty> RegisterParticipant(RegisterParticipantRequest request, ServerCallContext context)
+    public override async Task<RegisterParticipantResponse> RegisterParticipant(RegisterParticipantRequest request, ServerCallContext context)
     {
         try
         {
-            await registrationService.RegisterUserAsync(request.ContestStageId, request.YandexIdLogin, request.DisplayName, request.ParticipantId);
-            return new();
+            return new()
+            {
+                ContestUserId = await registrationService.RegisterUserAsync(request.ContestStageId, request.YandexIdLogin, request.DisplayName, request.ParticipantId)
+            };
         }
         catch (Exception e)
         {

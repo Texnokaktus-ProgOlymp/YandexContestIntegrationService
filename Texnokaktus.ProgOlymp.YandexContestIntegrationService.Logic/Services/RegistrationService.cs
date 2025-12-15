@@ -9,7 +9,7 @@ internal class RegistrationService(IParticipantService participantService,
                                    ContestClient contestClient,
                                    ILogger<RegistrationService> logger) : IRegistrationService
 {
-    public async Task RegisterUserAsync(long contestStageId, string yandexIdLogin, string? participantDisplayName, int participantId)
+    public async Task<long> RegisterUserAsync(long contestStageId, string yandexIdLogin, string? participantDisplayName, int participantId)
     {
         var contestUserId = await contestClient.Contests[contestStageId]
                                                .Participants
@@ -21,6 +21,8 @@ internal class RegistrationService(IParticipantService participantService,
 
         if (await participantService.GetContestUserIdAsync(contestStageId, participantId) is null)
             await participantService.AddContestParticipantAsync(contestStageId, participantId, yandexIdLogin, contestUserId);
+
+        return contestUserId;
     }
 
     public async Task UnregisterUserAsync(long contestStageId, int participantId)
