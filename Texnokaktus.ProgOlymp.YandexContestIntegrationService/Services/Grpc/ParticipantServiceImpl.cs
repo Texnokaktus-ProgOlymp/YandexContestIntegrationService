@@ -14,6 +14,16 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
 public class ParticipantServiceImpl(ContestClient contestClient, IParticipantService participantService) : ParticipantService.ParticipantServiceBase
 {
+    public override async Task<ContestParticipationResponse> GetContestParticipation(ContestParticipantsRequest request, ServerCallContext context)
+    {
+        var participantStatus = await contestClient.Contests[request.ContestId].Participation.GetAsync(cancellationToken: context.CancellationToken);
+
+        return new()
+        {
+            Result = participantStatus?.MapParticipationStatus()
+        };
+    }
+
     public override async Task<ContestParticipantsResponse> GetContestParticipants(ContestParticipantsRequest request, ServerCallContext context)
     {
         var participantInfos = await contestClient.Contests[request.ContestId].Participants.GetAsync(cancellationToken: context.CancellationToken);
@@ -68,8 +78,14 @@ file static class MappingExtensions
             FinishTime = DateTimeOffset.TryParse(participantStatus.ParticipantFinishTime, out var finishTime)
                              ? finishTime.ToTimestamp()
                              : null,
-            LeftTimeMilliseconds = participantStatus.ParticipantLeftTimeMillis ?? 0,
-            State = participantStatus.ContestState.MapParticipationState()
+            LeftTime = TimeSpan.FromMilliseconds(participantStatus.ParticipantLeftTimeMillis ?? 0).ToDuration(),
+            State = participantStatus.ContestState.MapParticipationState(),
+            ContestStartTime = DateTimeOffset.TryParse(participantStatus.ParticipantStartTime, out var contestStartTime)
+                            ? contestStartTime.ToTimestamp()
+                            : null,
+            ContestFinishTime = DateTimeOffset.TryParse(participantStatus.ParticipantFinishTime, out var contestFinishTime)
+                             ? contestFinishTime.ToTimestamp()
+                             : null
         };
 
     public static ParticipantStats MapParticipantStats(this YandexContestClient.Client.Models.ParticipantStats stats) =>
