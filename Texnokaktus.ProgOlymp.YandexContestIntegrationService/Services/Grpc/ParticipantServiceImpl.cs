@@ -14,7 +14,7 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
 public class ParticipantServiceImpl(ContestClient contestClient, IParticipantService participantService) : ParticipantService.ParticipantServiceBase
 {
-    public override async Task<ContestParticipationResponse> GetContestParticipation(ContestParticipantsRequest request, ServerCallContext context)
+    public override async Task<ContestParticipationResponse> GetContestOwnerParticipation(ContestParticipationRequest request, ServerCallContext context)
     {
         var participantStatus = await contestClient.Contests[request.ContestId].Participation.GetAsync(cancellationToken: context.CancellationToken);
 
@@ -80,10 +80,10 @@ file static class MappingExtensions
                              : null,
             LeftTime = TimeSpan.FromMilliseconds(participantStatus.ParticipantLeftTimeMillis ?? 0).ToDuration(),
             State = participantStatus.ContestState.MapParticipationState(),
-            ContestStartTime = DateTimeOffset.TryParse(participantStatus.ParticipantStartTime, out var contestStartTime)
+            ContestStartTime = DateTimeOffset.TryParse(participantStatus.ContestStartTime, out var contestStartTime)
                             ? contestStartTime.ToTimestamp()
                             : null,
-            ContestFinishTime = DateTimeOffset.TryParse(participantStatus.ParticipantFinishTime, out var contestFinishTime)
+            ContestFinishTime = DateTimeOffset.TryParse(participantStatus.ContestFinishTime, out var contestFinishTime)
                              ? contestFinishTime.ToTimestamp()
                              : null
         };
