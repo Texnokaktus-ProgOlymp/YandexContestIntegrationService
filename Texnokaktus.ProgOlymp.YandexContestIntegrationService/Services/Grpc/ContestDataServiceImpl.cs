@@ -2,6 +2,7 @@ using System.Globalization;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Extensions;
 using YandexContestClient.Client;
 using YandexContestClient.Client.Models;
 using CompilerLimit = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.CompilerLimit;
@@ -11,7 +12,6 @@ using ContestStandings = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexConte
 using ContestStandingsTitle = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStandingsTitle;
 using ContestStatistics = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestStatistics;
 using ContestType = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ContestType;
-using ParticipantInfo = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ParticipantInfo;
 using ParticipantStatus = YandexContestClient.Client.Models.ParticipantStatus;
 using ProblemResult = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.ProblemResult;
 using Statement = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.Statement;
@@ -70,6 +70,8 @@ public class ContestDataServiceImpl(ContestClient contestClient) : ContestDataSe
 
 file static class MappingExtensions
 {
+    private static readonly CultureInfo RuCultureInfo = CultureInfo.GetCultureInfo("ru-RU");
+
     public static ContestProblem MapContestProblem(this YandexContestClient.Client.Models.ContestProblem contestProblem) =>
         new()
         {
@@ -127,25 +129,15 @@ file static class MappingExtensions
             PlaceFrom = { contestStandingsRow.PlaceFrom?.Select(i => i!.Value) },
             PlaceTo = { contestStandingsRow.PlaceTo?.Select(i => i!.Value) },
             ProblemResults = { contestStandingsRow.ProblemResults?.Select(result => result.MapProblemResult()) },
-            Score = double.TryParse(contestStandingsRow.Score, CultureInfo.GetCultureInfo("ru-RU"), out var score)
+            Score = double.TryParse(contestStandingsRow.Score, RuCultureInfo, out var score)
                         ? score
                         : null
-        };
-
-    private static ParticipantInfo MapParticipantInfo(this YandexContestClient.Client.Models.ParticipantInfo participantInfo) =>
-        new()
-        {
-            Id = participantInfo.Id ?? 0L,
-            Login = participantInfo.Login,
-            Name = participantInfo.Name,
-            StartTime = participantInfo.StartTime,
-            Uid = participantInfo.Uid
         };
 
     private static ProblemResult MapProblemResult(this YandexContestClient.Client.Models.ProblemResult problemResult) =>
         new()
         {
-            Score = double.TryParse(problemResult.Score, CultureInfo.GetCultureInfo("ru-RU"), out var score)
+            Score = double.TryParse(problemResult.Score, RuCultureInfo, out var score)
                         ? score
                         : null,
             Status = problemResult.Status switch
@@ -211,26 +203,4 @@ file static class MappingExtensions
             null                                                                   => throw new ArgumentNullException(nameof(upsolvingAllowance)),
             _                                                                      => throw new ArgumentOutOfRangeException(nameof(upsolvingAllowance), upsolvingAllowance, "Invalid upsolving allowance type")
         };
-
-    /// <summary>
-    /// Converts a nullable duration in milliseconds into a Protobuf Duration object.
-    /// If the input is null, returns null.
-    /// </summary>
-    /// <param name="durationMilliseconds">The nullable duration in milliseconds to convert.</param>
-    /// <returns>A Protobuf Duration object representing the input duration, or null if the input is null.</returns>
-    private static Duration? ToDuration(this long? durationMilliseconds) =>
-        durationMilliseconds.HasValue
-            ? TimeSpan.FromMilliseconds(durationMilliseconds.Value).ToDuration()
-            : null;
-
-    /// <summary>
-    /// Converts a date and time string to a Protobuf Timestamp object.
-    /// If the input string is not in a valid date and time format, returns null.
-    /// </summary>
-    /// <param name="dateTimeString">The date and time string to convert.</param>
-    /// <returns>A Protobuf Timestamp object representing the parsed date and time, or null if parsing fails.</returns>
-    private static Timestamp? ToTimestamp(this string? dateTimeString) =>
-        DateTimeOffset.TryParse(dateTimeString, out var result)
-            ? result.ToTimestamp()
-            : null;
 }

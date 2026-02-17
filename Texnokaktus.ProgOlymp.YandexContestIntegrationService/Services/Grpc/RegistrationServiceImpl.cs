@@ -1,5 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Texnokaktus.ProgOlymp.Common.Contracts.Exceptions;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Exceptions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
@@ -8,12 +9,14 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
 public class RegistrationServiceImpl(IRegistrationService registrationService, ILogger<RegistrationServiceImpl> logger) : RegistrationService.RegistrationServiceBase
 {
-    public override async Task<Empty> RegisterParticipant(RegisterParticipantRequest request, ServerCallContext context)
+    public override async Task<RegisterParticipantResponse> RegisterParticipant(RegisterParticipantRequest request, ServerCallContext context)
     {
         try
         {
-            await registrationService.RegisterUserAsync(request.ContestStageId, request.YandexIdLogin, request.DisplayName, request.ParticipantId);
-            return new();
+            return new()
+            {
+                ContestUserId = await registrationService.RegisterUserAsync(request.ContestStageId, request.YandexIdLogin, request.DisplayName, request.ParticipantId)
+            };
         }
         catch (Exception e)
         {
@@ -31,11 +34,11 @@ public class RegistrationServiceImpl(IRegistrationService registrationService, I
         }
         catch (UserIsNotRegisteredException e)
         {
-            throw new RpcException(new(StatusCode.NotFound, e.Message, e));
+            throw new NotFoundException(e.Message, e);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error occurred while registering the user to the contest");
+            logger.LogError(e, "An error occurred while unregistering the user from the contest");
             throw;
         }
     }
