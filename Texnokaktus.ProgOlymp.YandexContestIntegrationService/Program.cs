@@ -38,7 +38,9 @@ builder.Services
        .AddAuthenticationHealthCheck(options => options.DefaultTokenKey = "DEFAULT")
        .AddDatabaseHealthChecks();
 
-builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom
+                                                                 .Configuration(context.Configuration)
+                                                                 .AddOpenTelemetrySupport("YandexContestIntegrationService"));
 
 builder.Services.AddTexnokaktusOpenTelemetry("YandexContestIntegrationService",
                                              providerBuilder => providerBuilder.AddSource("Microsoft.Kiota.Http.HttpClientLibrary"),
