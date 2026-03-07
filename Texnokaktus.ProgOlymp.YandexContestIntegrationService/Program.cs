@@ -25,7 +25,7 @@ builder.Services.AddStackExchangeRedisCache(options => options.ConnectionMultipl
 builder.Services.AddMemoryCache();
 
 builder.Services
-       .AddDefaultAWSOptions(builder.Configuration.GetAWSOptions())
+       .AddDefaultAWSOptions(builder.Configuration.GetAWSOptions("S3"))
        .AddAWSService<IAmazonS3>()
        .AddScoped<ITransferUtility, TransferUtility>();
 
