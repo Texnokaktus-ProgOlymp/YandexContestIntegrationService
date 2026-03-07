@@ -34,7 +34,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
 builder.Services
-       .AddGrpcHealthChecks()
+       .AddHealthChecks()
        .AddAuthenticationHealthCheck(options => options.DefaultTokenKey = "DEFAULT")
        .AddDatabaseHealthChecks();
 
@@ -56,8 +56,6 @@ if (app.Environment.IsDevelopment())
 {
     app.MapGrpcReflectionService();
 }
-
-app.MapGrpcHealthChecksService();
 
 app.MapGrpcService<CompilerServiceImpl>();
 app.MapGrpcService<ContestDataServiceImpl>();

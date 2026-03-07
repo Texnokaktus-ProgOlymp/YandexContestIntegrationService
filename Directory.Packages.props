@@ -7,7 +7,6 @@
   <ItemGroup>
     <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.22" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.18.6" />
-    <PackageVersion Include="Grpc.AspNetCore.HealthChecks" Version="2.76.0" />
     <PackageVersion Include="Grpc.AspNetCore.Server.Reflection" Version="2.76.0" />
     <PackageVersion Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.3" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.3" />
