@@ -1,6 +1,7 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Exceptions;
+using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.Common;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Extensions;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
@@ -120,6 +121,6 @@ file static class MappingExtensions
             ParticipantStatus_contestState.IN_PROGRESS => ParticipationState.InProgress,
             ParticipantStatus_contestState.FINISHED    => ParticipationState.Finished,
             ParticipantStatus_contestState.NOT_STARTED => ParticipationState.NotStarted,
-            _                                          => throw new ArgumentOutOfRangeException(nameof(participationState), participationState, null)
+            _                                          => throw new ArgumentOutOfRangeException(nameof(participationState), participationState, $"Unable to map {nameof(ParticipationState)}")
         };
 }
