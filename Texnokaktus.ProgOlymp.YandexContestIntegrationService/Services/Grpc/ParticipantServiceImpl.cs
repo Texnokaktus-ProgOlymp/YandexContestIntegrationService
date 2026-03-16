@@ -1,6 +1,5 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Texnokaktus.ProgOlymp.Common.Contracts.Exceptions;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.Common;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Extensions;
@@ -40,9 +39,7 @@ public class ParticipantServiceImpl(ContestClient contestClient, IParticipantSer
 
     public override async Task<ParticipantStatusResponse> GetParticipantStatus(ParticipantStatusRequest request, ServerCallContext context)
     {
-        var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantId);
-
-        var participantStatus = await contestClient.Contests[request.ContestId].Participants[contestUserId].GetAsync(cancellationToken: context.CancellationToken);
+        var participantStatus = await contestClient.Contests[request.ContestId].Participants[request.ContestParticipantId].GetAsync(cancellationToken: context.CancellationToken);
 
         return new()
         {
@@ -52,19 +49,13 @@ public class ParticipantServiceImpl(ContestClient contestClient, IParticipantSer
 
     public override async Task<ParticipantStatsResponse> GetParticipantStats(ParticipantStatsRequest request, ServerCallContext context)
     {
-        var contestUserId = await GetContestParticipantAsync(request.ContestId, request.ParticipantId);
-
-        var stats = await contestClient.Contests[request.ContestId].Participants[contestUserId].Stats.GetAsync(cancellationToken: context.CancellationToken);
+        var stats = await contestClient.Contests[request.ContestId].Participants[request.ContestParticipantId].Stats.GetAsync(cancellationToken: context.CancellationToken);
 
         return new()
         {
             Result = stats?.MapParticipantStats()
         };
     }
-
-    private async Task<long> GetContestParticipantAsync(long contestId, int participantId) =>
-        await participantService.GetContestUserIdAsync(contestId, participantId)
-     ?? throw new NotFoundException("Contest participant not found");
 }
 
 file static class MappingExtensions
