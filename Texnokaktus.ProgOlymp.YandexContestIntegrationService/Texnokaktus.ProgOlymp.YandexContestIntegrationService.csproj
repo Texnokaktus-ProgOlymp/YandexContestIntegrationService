@@ -7,8 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\modules\Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts.csproj" />
-    <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess\Texnokaktus.ProgOlymp.YandexContestIntegrationService.DataAccess.csproj" />
-    <ProjectReference Include="..\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic\Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
@@ -23,6 +21,9 @@
     <PackageReference Include="Serilog.Settings.Configuration" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Texnokaktus.ProgOlymp.OpenTelemetry" />
+    <PackageReference Include="YandexContestClient" />
+    <PackageReference Include="YandexOAuthClient.TokenStorage.Decorators.DataProtection" />
+    <PackageReference Include="YandexOAuthClient.TokenStorage.DistributedCache" />
     <PackageReference Include="YandexOAuthClient.Diagnostics.HealthChecks" />
   </ItemGroup>
   <ItemGroup>

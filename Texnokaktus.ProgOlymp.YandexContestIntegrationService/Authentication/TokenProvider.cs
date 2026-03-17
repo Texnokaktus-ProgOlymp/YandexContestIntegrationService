@@ -1,7 +1,7 @@
 using Microsoft.Kiota.Abstractions.Authentication;
 using YandexOAuthClient.Abstractions;
 
-namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Authentication;
+namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Authentication;
 
 internal class TokenProvider(IStoredAuthService<string> authService) : IAccessTokenProvider
 {

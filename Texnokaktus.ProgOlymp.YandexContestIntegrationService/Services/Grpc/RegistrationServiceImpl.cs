@@ -1,45 +1,51 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Texnokaktus.ProgOlymp.Common.Contracts.Exceptions;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Exceptions;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
+using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Exceptions;
+using YandexContestClient.Client;
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class RegistrationServiceImpl(IRegistrationService registrationService, ILogger<RegistrationServiceImpl> logger) : RegistrationService.RegistrationServiceBase
+public class RegistrationServiceImpl(ContestClient contestClient, ILogger<RegistrationServiceImpl> logger) : RegistrationService.RegistrationServiceBase
 {
     public override async Task<RegisterParticipantResponse> RegisterParticipant(RegisterParticipantRequest request, ServerCallContext context)
     {
-        try
+        var contestUserId = await contestClient.Contests[request.ContestStageId]
+                                               .Participants
+                                               .PostAsync(configuration => configuration.QueryParameters.Login = request.YandexIdLogin)
+                         ?? throw new YandexApiException("Unable to get Paricipant Id");
+
+        if (request.DisplayName is not null)
+            await SetParticipantDisplayNameAsync(request.ContestStageId, contestUserId, request.DisplayName);
+        
+        return new()
         {
-            return new()
-            {
-                ContestUserId = await registrationService.RegisterUserAsync(request.ContestStageId, request.YandexIdLogin, request.DisplayName, request.ParticipantId)
-            };
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "An error occurred while registering the user to the contest");
-            throw;
-        }
+            ContestParticipantId = contestUserId
+        };
     }
 
     public override async Task<Empty> UnregisterParticipant(UnregisterParticipantRequest request, ServerCallContext context)
     {
+        await contestClient.Contests[request.ContestStageId]
+                           .Participants[request.ContestParticipantId]
+                           .DeleteAsync();
+        return new();
+    }
+
+    private async Task SetParticipantDisplayNameAsync(long yandexContestId, long yandexParticipantId, string displayName)
+    {
         try
         {
-            await registrationService.UnregisterUserAsync(request.ContestStageId, request.ParticipantId);
-            return new();
-        }
-        catch (UserIsNotRegisteredException e)
-        {
-            throw new NotFoundException(e.Message, e);
+            await contestClient.Contests[yandexContestId]
+                               .Participants[yandexParticipantId]
+                               .PatchAsync(new()
+                                {
+                                    DisplayedName = displayName
+                                });
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error occurred while unregistering the user from the contest");
-            throw;
+            logger.LogError(e, "Unable to update participant's display name");
         }
     }
 }
