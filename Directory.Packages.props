@@ -9,9 +9,7 @@
     <PackageVersion Include="AWSSDK.S3" Version="4.0.18.7" />
     <PackageVersion Include="Grpc.AspNetCore.Server.Reflection" Version="2.76.0" />
     <PackageVersion Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.3" />
     <PackageVersion Include="MimeKitLite" Version="4.15.1" />
     <PackageVersion Include="Serilog.Enrichers.AssemblyName" Version="2.0.0" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />

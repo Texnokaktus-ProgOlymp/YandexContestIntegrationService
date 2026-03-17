@@ -3,7 +3,6 @@ using Grpc.Core;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.Common;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Extensions;
-using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Logic.Services.Abstractions;
 using YandexContestClient.Client;
 using YandexContestClient.Client.Models;
 using BriefRunReport = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest.BriefRunReport;
@@ -12,7 +11,7 @@ using ParticipantStatus = Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexCont
 
 namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
-public class ParticipantServiceImpl(ContestClient contestClient, IParticipantService participantService) : ParticipantService.ParticipantServiceBase
+public class ParticipantServiceImpl(ContestClient contestClient) : ParticipantService.ParticipantServiceBase
 {
     public override async Task<ContestParticipationResponse> GetContestOwnerParticipation(ContestParticipationRequest request, ServerCallContext context)
     {
