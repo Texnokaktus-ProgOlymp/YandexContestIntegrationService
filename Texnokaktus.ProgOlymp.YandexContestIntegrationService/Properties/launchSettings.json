@@ -7,7 +7,12 @@
             "launchBrowser": false,
             "applicationUrl": "http://localhost:5172",
             "environmentVariables": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "YandexAppParameters__ClientId": "0364b2ba6ce94d18a26663dae083e8d4",
+                "YandexAppParameters__ClientSecret": "abed65d125394b08bc6b9cbb6b27f6a2",
+                "AWS__ServiceURL": "https://s3.kav128.myddns.me",
+                "AWS_ACCESS_KEY_ID": "AzffiNe0lxTVrRT8OVEQ",
+                "AWS_SECRET_ACCESS_KEY": "2dqWGNbagTTKC3ANXv1ZZA99hJUF7wueDZgi8Lzw"
             }
         }
     }
