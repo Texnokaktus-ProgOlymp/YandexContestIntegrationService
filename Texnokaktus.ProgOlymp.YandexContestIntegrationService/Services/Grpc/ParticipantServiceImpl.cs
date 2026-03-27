@@ -15,7 +15,7 @@ public class ParticipantServiceImpl(ContestClient contestClient) : ParticipantSe
 {
     public override async Task<ContestParticipationResponse> GetContestOwnerParticipation(ContestParticipationRequest request, ServerCallContext context)
     {
-        var participantStatus = await contestClient.Contests[request.ContestId].Participation.GetAsync(cancellationToken: context.CancellationToken);
+        var participantStatus = await contestClient.V2.Contests[request.ContestId].Participation.GetAsync(cancellationToken: context.CancellationToken);
 
         return new()
         {
@@ -25,7 +25,7 @@ public class ParticipantServiceImpl(ContestClient contestClient) : ParticipantSe
 
     public override async Task<ContestParticipantsResponse> GetContestParticipants(ContestParticipantsRequest request, ServerCallContext context)
     {
-        var participantInfos = await contestClient.Contests[request.ContestId].Participants.GetAsync(cancellationToken: context.CancellationToken);
+        var participantInfos = await contestClient.V2.Contests[request.ContestId].Participants.GetAsync(cancellationToken: context.CancellationToken);
 
         return new()
         {
@@ -38,7 +38,7 @@ public class ParticipantServiceImpl(ContestClient contestClient) : ParticipantSe
 
     public override async Task<ParticipantStatusResponse> GetParticipantStatus(ParticipantStatusRequest request, ServerCallContext context)
     {
-        var participantStatus = await contestClient.Contests[request.ContestId].Participants[request.ContestParticipantId].GetAsync(cancellationToken: context.CancellationToken);
+        var participantStatus = await contestClient.V2.Contests[request.ContestId].Participants[request.ContestParticipantId].GetAsync(cancellationToken: context.CancellationToken);
 
         return new()
         {
@@ -48,7 +48,7 @@ public class ParticipantServiceImpl(ContestClient contestClient) : ParticipantSe
 
     public override async Task<ParticipantStatsResponse> GetParticipantStats(ParticipantStatsRequest request, ServerCallContext context)
     {
-        var stats = await contestClient.Contests[request.ContestId].Participants[request.ContestParticipantId].Stats.GetAsync(cancellationToken: context.CancellationToken);
+        var stats = await contestClient.V2.Contests[request.ContestId].Participants[request.ContestParticipantId].Stats.GetAsync(cancellationToken: context.CancellationToken);
 
         return new()
         {

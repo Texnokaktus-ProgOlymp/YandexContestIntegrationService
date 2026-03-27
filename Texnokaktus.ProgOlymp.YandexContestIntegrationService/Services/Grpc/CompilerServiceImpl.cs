@@ -21,7 +21,7 @@ public class CompilerServiceImpl(ContestClient client) : CompilerService.Compile
     /// <exception cref="Exception">Thrown when an invalid deprecated flag is encountered in the compiler data.</exception>
     public override async Task<GetCompilersResponse> GetCompilers(Empty request, ServerCallContext context)
     {
-        var response = await client.Compilers.GetAsync(cancellationToken: context.CancellationToken);
+        var response = await client.V2.Compilers.GetAsync(cancellationToken: context.CancellationToken);
 
         return new()
         {

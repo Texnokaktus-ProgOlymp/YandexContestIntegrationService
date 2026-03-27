@@ -30,8 +30,8 @@ public class ContestDataServiceImpl(ContestClient contestClient) : ContestDataSe
 
     public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
     {
-        var contestDescription = await contestClient.Contests[request.ContestId].GetAsync();
-        var participantStatus = await contestClient.Contests[request.ContestId].Participation.GetAsync();
+        var contestDescription = await contestClient.V2.Contests[request.ContestId].GetAsync();
+        var participantStatus = await contestClient.V2.Contests[request.ContestId].Participation.GetAsync();
 
         return new()
         {
@@ -41,7 +41,7 @@ public class ContestDataServiceImpl(ContestClient contestClient) : ContestDataSe
 
     public override async Task<GetProblemsResponse> GetProblems(GetProblemsRequest request, ServerCallContext context)
     {
-        var contestProblems = await contestClient.Contests[request.ContestId].Problems.GetAsync();
+        var contestProblems = await contestClient.V2.Contests[request.ContestId].Problems.GetAsync();
 
         return new()
         {
@@ -51,7 +51,8 @@ public class ContestDataServiceImpl(ContestClient contestClient) : ContestDataSe
 
     public override async Task<GetStandingsResponse> GetStandings(GetStandingsRequest request, ServerCallContext context)
     {
-        var contestStandings = await contestClient.Contests[request.ContestId]
+        var contestStandings = await contestClient.V2
+                                                  .Contests[request.ContestId]
                                                   .Standings
                                                   .GetAsync(configuration =>
                                                    {

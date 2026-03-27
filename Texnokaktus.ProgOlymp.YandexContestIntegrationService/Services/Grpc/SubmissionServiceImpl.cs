@@ -37,7 +37,8 @@ public class SubmissionServiceImpl(ContestClient client, ITransferUtility transf
 
         do
         {
-            submissions = await client.Contests[request.ContestStageId]
+            submissions = await client.V2
+                                      .Contests[request.ContestStageId]
                                       .Submissions
                                       .GetAsync(configuration => configuration.QueryParameters.Page = ++currentPage,
                                                 context.CancellationToken);
@@ -58,7 +59,8 @@ public class SubmissionServiceImpl(ContestClient client, ITransferUtility transf
     /// <returns>A Task that represents the asynchronous operation, returning a detailed SubmissionFullReport object containing the IP address and test details of the submission.</returns>
     public override async Task<SubmissionFullReport> GetSubmissionFullReport(GetSubmissionFullReportRequest request, ServerCallContext context)
     {
-        var runReport = await client.Contests[request.ContestStageId]
+        var runReport = await client.V2
+                                    .Contests[request.ContestStageId]
                                     .Submissions[request.SubmissionId]
                                     .Full
                                     .GetAsync(cancellationToken: context.CancellationToken);
@@ -86,7 +88,8 @@ public class SubmissionServiceImpl(ContestClient client, ITransferUtility transf
             InspectResponseHeaders = true
         };
 
-        await using var stream = await client.Contests[request.ContestStageId]
+        await using var stream = await client.V2
+                                             .Contests[request.ContestStageId]
                                              .Submissions[request.SubmissionId]
                                              .Source
                                              .GetAsync(configuration => configuration.Options.Add(headersInspectionHandlerOption),
@@ -121,7 +124,7 @@ public class SubmissionServiceImpl(ContestClient client, ITransferUtility transf
     /// <returns>A Task representing the asynchronous operation, which completes when the rejudging request has been successfully initiated.</returns>
     public override async Task<Empty> RejudgeSubmission(RejudgeSubmissionRequest request, ServerCallContext context)
     {
-        await client.Submissions[request.SubmissionId].Rejudge.PostAsync();
+        await client.V2.Submissions[request.SubmissionId].Rejudge.PostAsync();
         return new();
     }
 }

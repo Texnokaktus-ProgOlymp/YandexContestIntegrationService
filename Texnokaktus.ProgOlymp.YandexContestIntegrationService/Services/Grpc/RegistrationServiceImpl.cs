@@ -10,7 +10,8 @@ public class RegistrationServiceImpl(ContestClient contestClient, ILogger<Regist
 {
     public override async Task<RegisterParticipantResponse> RegisterParticipant(RegisterParticipantRequest request, ServerCallContext context)
     {
-        var contestUserId = await contestClient.Contests[request.ContestStageId]
+        var contestUserId = await contestClient.V2
+                                               .Contests[request.ContestStageId]
                                                .Participants
                                                .PostAsync(configuration => configuration.QueryParameters.Login = request.YandexIdLogin)
                          ?? throw new YandexApiException("Unable to get Paricipant Id");
@@ -26,7 +27,8 @@ public class RegistrationServiceImpl(ContestClient contestClient, ILogger<Regist
 
     public override async Task<Empty> UnregisterParticipant(UnregisterParticipantRequest request, ServerCallContext context)
     {
-        await contestClient.Contests[request.ContestStageId]
+        await contestClient.V2
+                           .Contests[request.ContestStageId]
                            .Participants[request.ContestParticipantId]
                            .DeleteAsync();
         return new();
@@ -36,7 +38,8 @@ public class RegistrationServiceImpl(ContestClient contestClient, ILogger<Regist
     {
         try
         {
-            await contestClient.Contests[yandexContestId]
+            await contestClient.V2
+                               .Contests[yandexContestId]
                                .Participants[yandexParticipantId]
                                .PatchAsync(new()
                                 {
