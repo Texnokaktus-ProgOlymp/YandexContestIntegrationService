@@ -7,9 +7,6 @@
     <File Path="NuGet.Config" />
     <File Path=".github/workflows/dotnet.yml" />
   </Folder>
-  <Folder Name="/modules/">
-    <Project Path="modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts.csproj" />
-  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" />
   </Folder>

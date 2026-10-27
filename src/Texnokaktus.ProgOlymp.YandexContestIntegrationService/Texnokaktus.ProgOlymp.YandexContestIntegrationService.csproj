@@ -3,11 +3,23 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\modules\Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts.csproj" />
+    <Protobuf Include="..\..\modules\Common.Contracts\proto\Common\common.proto"
+              ProtoRoot="..\..\modules\Common.Contracts\proto"
+              Link="Proto\Common\common.proto"
+              GrpcServices="None" />
+    <Protobuf Include="..\..\modules\Common.Contracts\proto\YandexContest\*.proto"
+              ProtoRoot="..\..\modules\Common.Contracts\proto"
+              Link="Proto\YandexContest\%(Filename)%(Extension)"
+              GrpcServices="Server" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\modules\Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts\Grpc\Common\DecimalValue.cs"
+             Link="Proto\Common\DecimalValue.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
     <PackageReference Include="AWSSDK.S3" />
+    <PackageReference Include="Grpc.AspNetCore" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />

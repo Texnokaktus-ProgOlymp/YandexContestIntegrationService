@@ -13,9 +13,7 @@ WORKDIR /src
 COPY ["Directory.Packages.props", "./"]
 COPY ["Directory.Build.props", "./"]
 COPY ["NuGet.Config", "./"]
-COPY ["modules/Common.Contracts/Directory.Packages.props", "modules/Common.Contracts/"]
 COPY ["src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj", "src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/"]
-COPY ["modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts.csproj", "modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/"]
 RUN --mount=type=secret,id=github_credentials,required=true \
     NuGetPackageSourceCredentials_github="$(cat /run/secrets/github_credentials)" \
     dotnet restore "src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" --configfile NuGet.Config --runtime $TARGETOS-$TARGETARCH

@@ -23,7 +23,7 @@ flowchart LR
 | `ParticipantService` | Участие владельца токена, список участников, статус и статистика участника. |
 | `SubmissionService` | Поток посылок, отчёт по тестам, сохранение исходника в S3 и перепроверка посылки. |
 
-Контракты RPC находятся в [Protos/YandexContest](modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/Protos/YandexContest) подключённого submodule. Реализации — в [Services/Grpc](src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Services/Grpc).
+Контракты RPC находятся в [proto/YandexContest](modules/Common.Contracts/proto/YandexContest) подключённого submodule. Приложение подключает их и общий `proto/Common/common.proto` напрямую, генерируя серверные gRPC-типы при сборке. Исходный [DecimalValue.cs](modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/Grpc/Common/DecimalValue.cs) также подключён из submodule для преобразования оценок. Реализации — в [Services/Grpc](src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Services/Grpc).
 
 `DownloadSubmissionSource` скачивает файл из Яндекс Контеста и загружает его в bucket `submissions`. Ответ содержит ключ объекта в поле `fileName`; содержимое файла и URL скачивания в ответ не входят. Ключ берётся из имени файла в `Content-Disposition`, а при его отсутствии — из идентификатора посылки.
 
@@ -45,7 +45,7 @@ flowchart LR
 │       ├── appsettings.json
 │       └── Dockerfile
 ├── modules/
-│   └── Common.Contracts/            # Git submodule со своим CPM
+│   └── Common.Contracts/            # Git submodule с proto-контрактами
 └── .github/workflows/dotnet.yml
 ```
 
@@ -75,7 +75,7 @@ dotnet restore Texnokaktus.ProgOlymp.YandexContestIntegrationService.slnx
 dotnet build Texnokaktus.ProgOlymp.YandexContestIntegrationService.slnx --no-restore
 ```
 
-URL submodule в `.gitmodules` использует SSH, поэтому для его загрузки нужен настроенный доступ к GitHub по SSH. Версии зависимостей приложения управляются корневым `Directory.Packages.props`; версии контрактного проекта — отдельным файлом внутри submodule.
+URL submodule в `.gitmodules` использует SSH, поэтому для его загрузки нужен настроенный доступ к GitHub по SSH. Версии зависимостей приложения управляются корневым `Directory.Packages.props`.
 
 ## Конфигурация и зависимости
 

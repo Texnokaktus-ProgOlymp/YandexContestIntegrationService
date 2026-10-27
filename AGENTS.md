@@ -5,13 +5,13 @@
 - Репозиторий содержит ASP.NET Core gRPC-сервис на .NET 10 для интеграции ProgOlymp с Яндекс Контестом. Описание запуска и конфигурации находится в `README.md`.
 - Основной проект — `src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/`. Регистрация зависимостей, middleware и gRPC-сервисов находится в `Program.cs`.
 - Реализации RPC находятся в `Services/Grpc/`, получение OAuth-токена для исходящих запросов — в `Authentication/TokenProvider.cs`, общие преобразования моделей — в `Extensions/CommonMapping.cs`. Преобразования, нужные одному сервису, также встречаются в его file-local классах.
-- Контракты находятся в git submodule `modules/Common.Contracts`, в каталоге `Texnokaktus.ProgOlymp.Common.Contracts/Protos/YandexContest/`. Это отдельный репозиторий; при изменении контрактов учитывай состояние submodule и изменение его commit pointer в основном репозитории.
+- Контракты находятся в git submodule `modules/Common.Contracts`, в каталогах `proto/YandexContest/` и `proto/Common/`. Приложение подключает необходимые `.proto` и `Texnokaktus.ProgOlymp.Common.Contracts/Grpc/Common/DecimalValue.cs` напрямую в `.csproj` и генерирует серверные gRPC-типы. Это отдельный репозиторий; при изменении контрактов учитывай состояние submodule и изменение его commit pointer в основном репозитории.
 
 ## Структура и зависимости
 
 - Сохраняй формат solution `.slnx`. Production-проекты размещай в `src/`, тестовые проекты — в `tests/`; сейчас тестовых проектов нет.
 - Общие свойства сборки задаются в корневом `Directory.Build.props`. Если добавляешь вложенный props, явно импортируй родительский файл, чтобы сохранить наследование.
-- Версии NuGet-пакетов приложения задаются в корневом `Directory.Packages.props`, ссылки `PackageReference` в `.csproj` указываются без версии. У submodule собственный `Directory.Packages.props` и отдельная область версий.
+- Версии NuGet-пакетов приложения задаются в корневом `Directory.Packages.props`, ссылки `PackageReference` в `.csproj` указываются без версии. Приложение не ссылается на `.csproj` submodule.
 - Источники пакетов и Package Source Mapping определены в корневом `NuGet.Config`. При добавлении пакетов из GitHub Packages проверь соответствующий шаблон, включая транзитивные зависимости; учётные данные в репозиторий не добавляй.
 - При переносе проектов обновляй пути в `.slnx`, `ProjectReference`, связанных Content-файлах, Dockerfile и `.github/workflows/dotnet.yml`. Docker build context — корень репозитория; props и проекты должны копироваться до `dotnet restore`.
 - Поддерживай Solution Items для общих файлов и документации. Пути в solution должны вести к существующим файлам.
