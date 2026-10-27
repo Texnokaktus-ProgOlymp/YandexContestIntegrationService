@@ -1,6 +1,15 @@
-﻿<Solution>
-  <Folder Name="/Common/">
-    <Project Path="modules\Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts\Texnokaktus.ProgOlymp.Common.Contracts.csproj" />
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="AGENTS.md" />
+    <File Path="README.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path=".github/workflows/dotnet.yml" />
   </Folder>
-  <Project Path="Texnokaktus.ProgOlymp.YandexContestIntegrationService\Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" />
+  <Folder Name="/modules/">
+    <Project Path="modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" />
+  </Folder>
 </Solution>

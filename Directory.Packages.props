@@ -5,19 +5,14 @@
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.27" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.19.3" />
-    <PackageVersion Include="Grpc.AspNetCore.Server.Reflection" Version="2.76.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.5" />
-    <PackageVersion Include="MimeKitLite" Version="4.15.1" />
-    <PackageVersion Include="Serilog.Enrichers.AssemblyName" Version="2.0.0" />
-    <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
-    <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
-    <PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.0" />
-    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
-    <PackageVersion Include="Texnokaktus.ProgOlymp.OpenTelemetry" Version="1.13.1" />
-    <PackageVersion Include="YandexContestClient" Version="1.12.1" />
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.102.7" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.7" />
+    <PackageVersion Include="Grpc.AspNetCore.Server.Reflection" Version="2.84.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.14" />
+    <PackageVersion Include="MimeKitLite" Version="4.18.1" />
+    <PackageVersion Include="Texnokaktus.ProgOlymp.Platform" Version="2026.9.19.2" />
+    <PackageVersion Include="YandexContestClient" Version="2026.10.27.14" />
     <PackageVersion Include="YandexOAuthClient.Diagnostics.HealthChecks" Version="1.7.1" />
     <PackageVersion Include="YandexOAuthClient.TokenStorage.Decorators.DataProtection" Version="1.7.1" />
     <PackageVersion Include="YandexOAuthClient.TokenStorage.DistributedCache" Version="1.7.1" />

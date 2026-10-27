@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
@@ -12,13 +12,14 @@ ARG TARGETOS
 ARG TARGETARCH
 WORKDIR /src
 COPY ["Directory.Packages.props", "./"]
+COPY ["Directory.Build.props", "./"]
 COPY ["modules/Common.Contracts/Directory.Packages.props", "modules/Common.Contracts/"]
-COPY ["Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj", "Texnokaktus.ProgOlymp.YandexContestIntegrationService/"]
+COPY ["src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj", "src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/"]
 COPY ["modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts.csproj", "modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/"]
 RUN dotnet nuget add source --username kav128 --password $GHPAT --store-password-in-clear-text --name "GitHub TexnoKaktus-Progolymp" https://nuget.pkg.github.com/Texnokaktus-ProgOlymp/index.json
-RUN dotnet restore "Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" --runtime $TARGETOS-$TARGETARCH
+RUN dotnet restore "src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" --runtime $TARGETOS-$TARGETARCH
 COPY . .
-WORKDIR "/src/Texnokaktus.ProgOlymp.YandexContestIntegrationService"
+WORKDIR "/src/src/Texnokaktus.ProgOlymp.YandexContestIntegrationService"
 RUN dotnet build "./Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
@@ -27,5 +28,6 @@ RUN dotnet publish "./Texnokaktus.ProgOlymp.YandexContestIntegrationService.cspr
 
 FROM base AS final
 WORKDIR /app
+ENV SERVICE_NAME=YandexContestIntegrationService
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Texnokaktus.ProgOlymp.YandexContestIntegrationService.dll"]

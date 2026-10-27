@@ -2,9 +2,8 @@ using System.Reflection;
 using Amazon.S3;
 using Amazon.S3.Transfer;
 using Microsoft.AspNetCore.DataProtection;
-using Serilog;
 using StackExchange.Redis;
-using Texnokaktus.ProgOlymp.OpenTelemetry;
+using Texnokaktus.ProgOlymp.Platform;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Authentication;
 using Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 using YandexContestClient;
@@ -14,6 +13,9 @@ using YandexOAuthClient.TokenStorage.Decorators.DataProtection;
 using YandexOAuthClient.TokenStorage.DistributedCache;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.UsePlatform(configurator => configurator.ConfigureOpenTelemetry
+                                                .WithTracerConfiguration(providerBuilder => providerBuilder.AddSource("Microsoft.Kiota.Http.HttpClientLibrary")) );
 
 builder.Services
        .AddYandexContestClient()
@@ -41,14 +43,6 @@ builder.Services.AddGrpcReflection();
 builder.Services
        .AddHealthChecks()
        .AddAuthenticationHealthCheck(options => options.DefaultTokenKey = "DEFAULT");
-
-builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom
-                                                                 .Configuration(context.Configuration)
-                                                                 .AddOpenTelemetrySupport("YandexContestIntegrationService"));
-
-builder.Services.AddTexnokaktusOpenTelemetry("YandexContestIntegrationService",
-                                             providerBuilder => providerBuilder.AddSource("Microsoft.Kiota.Http.HttpClientLibrary"),
-                                             null);
 
 builder.Services
        .AddDataProtection(options => options.ApplicationDiscriminator = Assembly.GetEntryAssembly()?.GetName().Name)

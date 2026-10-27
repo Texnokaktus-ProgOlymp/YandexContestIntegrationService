@@ -86,7 +86,7 @@ jobs:
           build-args: |
             GHPAT=${{ secrets.GITHUB_TOKEN }}
             VERSION=${{ steps.get-version.outputs.version }}
-          file: Texnokaktus.ProgOlymp.YandexContestIntegrationService/Dockerfile
+          file: src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
