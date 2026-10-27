@@ -12,6 +12,7 @@
 - Сохраняй формат solution `.slnx`. Production-проекты размещай в `src/`, тестовые проекты — в `tests/`; сейчас тестовых проектов нет.
 - Общие свойства сборки задаются в корневом `Directory.Build.props`. Если добавляешь вложенный props, явно импортируй родительский файл, чтобы сохранить наследование.
 - Версии NuGet-пакетов приложения задаются в корневом `Directory.Packages.props`, ссылки `PackageReference` в `.csproj` указываются без версии. У submodule собственный `Directory.Packages.props` и отдельная область версий.
+- Источники пакетов и Package Source Mapping определены в корневом `NuGet.Config`. При добавлении пакетов из GitHub Packages проверь соответствующий шаблон, включая транзитивные зависимости; учётные данные в репозиторий не добавляй.
 - При переносе проектов обновляй пути в `.slnx`, `ProjectReference`, связанных Content-файлах, Dockerfile и `.github/workflows/dotnet.yml`. Docker build context — корень репозитория; props и проекты должны копироваться до `dotnet restore`.
 - Поддерживай Solution Items для общих файлов и документации. Пути в solution должны вести к существующим файлам.
 
@@ -25,7 +26,7 @@ dotnet restore Texnokaktus.ProgOlymp.YandexContestIntegrationService.slnx
 dotnet build Texnokaktus.ProgOlymp.YandexContestIntegrationService.slnx --no-restore
 ```
 
-- Для restore требуется доступ к GitHub Packages организации `Texnokaktus-ProgOlymp`; источник и учётные данные настраиваются вне репозитория.
+- Для restore требуется доступ к GitHub Packages организации `Texnokaktus-ProgOlymp`; учётные данные источника `github` задаются вне репозитория, например через `NuGetPackageSourceCredentials_github`.
 - После изменения иерархии props проверяй эффективные свойства проекта через `dotnet msbuild <project.csproj> -getProperty:TargetFramework,Nullable,ImplicitUsings,TreatWarningsAsErrors`.
 - При появлении тестовых проектов запускай тесты, относящиеся к изменению. Для правок только документации проверь ссылки, пути и соответствие примеров текущему коду.
 - Если сборка прервалась с MSB5021 без ошибок компиляции, повтори её с `-m:1`: такой случай зафиксирован в `.agent/friction.md`.

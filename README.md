@@ -34,6 +34,7 @@ flowchart LR
 ├── Texnokaktus.ProgOlymp.YandexContestIntegrationService.slnx
 ├── Directory.Build.props            # Общие настройки сборки
 ├── Directory.Packages.props         # Версии NuGet-пакетов приложения (CPM)
+├── NuGet.Config                     # Источники и соответствие пакетов источникам
 ├── AGENTS.md                        # Инструкции для работы с репозиторием
 ├── src/
 │   └── Texnokaktus.ProgOlymp.YandexContestIntegrationService/
@@ -58,7 +59,13 @@ flowchart LR
 https://nuget.pkg.github.com/Texnokaktus-ProgOlymp/index.json
 ```
 
-Настройте источник и учётные данные в пользовательской конфигурации NuGet. В CI источник добавляется с использованием `GITHUB_TOKEN`.
+Источники и Package Source Mapping заданы в [NuGet.Config](NuGet.Config): пакеты `Texnokaktus.ProgOlymp.*`, `YandexContestClient*` и `YandexOAuthClient*` восстанавливаются из GitHub Packages, остальные — из nuget.org. Настройте учётные данные источника `github` в пользовательской конфигурации NuGet или задайте переменную окружения, например в PowerShell:
+
+```powershell
+$env:NuGetPackageSourceCredentials_github = "Username=<github-user>;Password=<github-token>"
+```
+
+Токен должен иметь доступ на чтение необходимых пакетов. CI использует `GITHUB_TOKEN`. Package Source Mapping применяется при скачивании: уже имеющиеся пакеты в глобальном кеше NuGet повторно по источнику не проверяются.
 
 Из корня существующего checkout выполните:
 
@@ -149,10 +156,10 @@ grpcurl -plaintext -d '{}' localhost:7234 YandexAuthenticationService/IsServiceA
 
 ## Docker и CI
 
-Dockerfile расположен в каталоге приложения, **контекст сборки — корень репозитория**. Сборка требует инициализированного submodule и аргумента `GHPAT` для доступа к GitHub Packages. Например, при уже заданной переменной окружения `GHPAT`:
+Dockerfile расположен в каталоге приложения, **контекст сборки — корень репозитория**. Сборка требует инициализированного submodule и BuildKit secret `github_credentials` для доступа к GitHub Packages. Например, при уже заданной переменной окружения `NuGetPackageSourceCredentials_github` из раздела подготовки:
 
 ```shell
-docker build --platform linux/amd64 --file src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Dockerfile --build-arg GHPAT --build-arg VERSION=0.0.0-local --tag yandex-contest-integration-service:local .
+docker build --platform linux/amd64 --file src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Dockerfile --secret id=github_credentials,env=NuGetPackageSourceCredentials_github --build-arg VERSION=0.0.0-local --tag yandex-contest-integration-service:local .
 ```
 
 Контейнер слушает gRPC на порту `8081` и HTTP/1 на `8080`. При запуске передайте переменные из раздела конфигурации и адрес Redis, доступный из сети контейнера. Значение `localhost` внутри контейнера указывает на сам контейнер.

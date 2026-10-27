@@ -20,10 +20,10 @@ jobs:
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 10.x.x
-    - name: Setup NuGet
-      run: dotnet nuget add source --username Texnokaktus-ProgOlymp --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Texnokaktus-ProgOlymp/index.json"
     - name: Restore dependencies
-      run: dotnet restore
+      env:
+        NuGetPackageSourceCredentials_github: Username=Texnokaktus-ProgOlymp;Password=${{ secrets.GITHUB_TOKEN }}
+      run: dotnet restore --configfile NuGet.Config
     - name: Build
       run: dotnet build --no-restore
     - name: Test
@@ -80,12 +80,15 @@ jobs:
       - name: Build and push Docker image
         id: build
         uses: docker/build-push-action@v7
+        env:
+          NuGetPackageSourceCredentials_github: Username=Texnokaktus-ProgOlymp;Password=${{ secrets.GITHUB_TOKEN }}
         with:
           platforms: linux/amd64,linux/arm64
           context: .
           build-args: |
-            GHPAT=${{ secrets.GITHUB_TOKEN }}
             VERSION=${{ steps.get-version.outputs.version }}
+          secret-envs: |
+            github_credentials=NuGetPackageSourceCredentials_github
           file: src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}

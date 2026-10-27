@@ -6,25 +6,26 @@ EXPOSE 8081
 
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
-ARG GHPAT
 ARG VERSION
 ARG TARGETOS
 ARG TARGETARCH
 WORKDIR /src
 COPY ["Directory.Packages.props", "./"]
 COPY ["Directory.Build.props", "./"]
+COPY ["NuGet.Config", "./"]
 COPY ["modules/Common.Contracts/Directory.Packages.props", "modules/Common.Contracts/"]
 COPY ["src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj", "src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/"]
 COPY ["modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts.csproj", "modules/Common.Contracts/Texnokaktus.ProgOlymp.Common.Contracts/"]
-RUN dotnet nuget add source --username kav128 --password $GHPAT --store-password-in-clear-text --name "GitHub TexnoKaktus-Progolymp" https://nuget.pkg.github.com/Texnokaktus-ProgOlymp/index.json
-RUN dotnet restore "src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" --runtime $TARGETOS-$TARGETARCH
+RUN --mount=type=secret,id=github_credentials,required=true \
+    NuGetPackageSourceCredentials_github="$(cat /run/secrets/github_credentials)" \
+    dotnet restore "src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" --configfile NuGet.Config --runtime $TARGETOS-$TARGETARCH
 COPY . .
 WORKDIR "/src/src/Texnokaktus.ProgOlymp.YandexContestIntegrationService"
-RUN dotnet build "./Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" --no-restore -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:Version=$VERSION
+RUN dotnet publish "./Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" --no-restore -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:Version=$VERSION
 
 FROM base AS final
 WORKDIR /app
