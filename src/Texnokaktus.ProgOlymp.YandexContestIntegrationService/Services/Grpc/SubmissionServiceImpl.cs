@@ -346,7 +346,7 @@ file static class MappingExtensions
             TestName = testLog.TestName ?? string.Empty,
             TestSetId = testLog.TestsetIdx ?? 0,
             Memory = testLog.MemoryUsed,
-            Time = TimeSpan.FromMilliseconds(testLog.RunningTime ?? 0).ToDuration(),
+            Time = ContestObservationReader.Milliseconds(testLog.RunningTime),
             IsSample = testLog.IsSample ?? false,
             Verdict = testLog.Verdict.MapVerdict()
         };

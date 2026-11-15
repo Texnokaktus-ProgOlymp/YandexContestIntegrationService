@@ -53,8 +53,40 @@ public sealed class LegacyContractTests : SetupBase
                 Assert.That(tests.Single().SequenceNumber, Is.EqualTo(1));
                 Assert.That(tests.Single().TestSetId, Is.EqualTo(2));
                 Assert.That(tests.Single().Verdict, Is.EqualTo(Verdict.Ok));
+                Assert.That(tests.Single().Time, Is.Null);
                 Assert.That(response.Observation.FinalScoreText, Is.EqualTo("1.005"));
             }
+        );
+    }
+
+    [TestCase("", null)]
+    [TestCase(",\"runningTime\":null", null)]
+    [TestCase(",\"runningTime\":0", 0)]
+    [TestCase(",\"runningTime\":1234", 1234)]
+    public async Task FullReportPreservesNullableTestRunningTime(string runningTimeJson, int? expectedMilliseconds)
+    {
+        Factory.Upstream.EnqueueJson(
+            $$"""
+              {"contestId":401,"runId":417,"status":"FINISHED",
+               "checkerLog":[{"sequenceNumber":1,"testName":"sample","verdict":"OK"{{runningTimeJson}}}]}
+              """
+        );
+
+        var response = await Api.Unary(
+                                     SubmissionServiceName,
+                                     "GetSubmissionFullReport",
+                                     new GetSubmissionFullReportRequest
+                                     {
+                                         ContestStageId = 401,
+                                         SubmissionId = 417
+                                     },
+                                     SubmissionFullReport.Parser
+                                 )
+                                .ResponseAsync;
+
+        Assert.That(
+            response.Tests.Single().Time?.ToTimeSpan(),
+            Is.EqualTo(expectedMilliseconds is { } value ? TimeSpan.FromMilliseconds(value) : (TimeSpan?)null)
         );
     }
 
