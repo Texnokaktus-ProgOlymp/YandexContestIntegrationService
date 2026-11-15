@@ -27,7 +27,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet run --project tests/Texnokaktus.ProgOlymp.YandexContestIntegrationService.IntegrationTests --configuration Debug --no-build -- --minimum-expected-tests 1
 
   docker:
 

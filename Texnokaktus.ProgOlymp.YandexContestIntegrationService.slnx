@@ -10,4 +10,8 @@
   <Folder Name="/src/">
     <Project Path="src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/Directory.Build.props" />
+    <Project Path="tests/Texnokaktus.ProgOlymp.YandexContestIntegrationService.IntegrationTests/Texnokaktus.ProgOlymp.YandexContestIntegrationService.IntegrationTests.csproj" />
+  </Folder>
 </Solution>

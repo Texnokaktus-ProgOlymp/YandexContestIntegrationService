@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+        <PackageReference Include="Grpc.Net.Client" />
+        <PackageReference Include="AWSSDK.S3" />
+        <PackageReference Include="Microsoft.Kiota.Abstractions" />
+        <PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" />
+        <PackageReference Include="NSubstitute" />
+        <PackageReference Include="Testcontainers.Redis" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../../src/Texnokaktus.ProgOlymp.YandexContestIntegrationService/Texnokaktus.ProgOlymp.YandexContestIntegrationService.csproj" />
+    </ItemGroup>
+</Project>

@@ -15,7 +15,12 @@ using YandexOAuthClient.TokenStorage.DistributedCache;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.UsePlatform(configurator => configurator.ConfigureOpenTelemetry
-                                                .WithTracerConfiguration(providerBuilder => providerBuilder.AddSource("Microsoft.Kiota.Http.HttpClientLibrary")) );
+                                                .WithTracerConfiguration(providerBuilder =>
+                                                                             providerBuilder.AddSource(
+                                                                                 "Microsoft.Kiota.Http.HttpClientLibrary"
+                                                                             )
+                                                 )
+);
 
 builder.Services
        .AddYandexContestClient()
@@ -26,9 +31,17 @@ builder.Services
        .AddStoredOAuthClient<string>()
        .WithDistributedCacheStorage(configurator => configurator.ProtectStorage());
 
-var connectionMultiplexer = await ConnectionMultiplexer.ConnectAsync(builder.Configuration.GetConnectionString("DefaultRedis")!);
+var connectionMultiplexer =
+    await ConnectionMultiplexer.ConnectAsync(builder.Configuration.GetConnectionString("DefaultRedis")!);
+
 builder.Services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer);
-builder.Services.AddStackExchangeRedisCache(options => options.ConnectionMultiplexerFactory = () => Task.FromResult<IConnectionMultiplexer>(connectionMultiplexer));
+
+builder.Services.AddStackExchangeRedisCache(options => options.ConnectionMultiplexerFactory =
+                                                           () => Task.FromResult<IConnectionMultiplexer>(
+                                                               connectionMultiplexer
+                                                           )
+);
+
 builder.Services.AddMemoryCache();
 
 builder.Services
@@ -40,6 +53,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 
 builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
+
 builder.Services
        .AddHealthChecks()
        .AddAuthenticationHealthCheck(options => options.DefaultTokenKey = "DEFAULT");
@@ -64,3 +78,5 @@ app.MapGrpcService<SubmissionServiceImpl>();
 app.MapGrpcService<YandexAuthenticationServiceImpl>();
 
 await app.RunAsync();
+
+public partial class Program;

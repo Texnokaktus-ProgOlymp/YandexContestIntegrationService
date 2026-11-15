@@ -27,6 +27,20 @@ flowchart LR
 
 `DownloadSubmissionSource` скачивает файл из Яндекс Контеста и загружает его в bucket `submissions`. Ответ содержит ключ объекта в поле `fileName`; содержимое файла и URL скачивания в ответ не входят. Ключ берётся из имени файла в `Content-Disposition`, а при его отсутствии — из идентификатора посылки.
 
+## Наблюдения отчётов и страниц для Judge
+
+`GetSubmissionFullReport` сохраняет прежние поля `ipAddress` и `tests` и дополнительно возвращает `observation`. Идентичность содержит фактически полученные `contestId`, `runId`, `participantId` и `problemId`; отсутствующие значения не заменяются значениями запроса. Если присутствующий Contest/Run ID противоречит запросу, RPC отвечает `DataLoss`. Перепроверка может изменить наблюдение с той же идентичностью: upstream не предоставляет отдельной версии полного отчёта.
+
+Состояние обработки `WAITING`, `RUNNING`, `FINISHED` или `FAILED` передаётся отдельно от вердикта. Отсутствующее или неизвестное состояние остаётся `UNSPECIFIED`; пустой вердикт не подтверждает ни ожидание, ни окончание обработки. Тексты `finalScoreText` и `preliminaryScoreText`, nullable времена и `rawJson` берутся из того же HTTP-ответа, который десериализуется штатным Kiota-сериализатором. Второго запроса нет. `rawJson` содержит только выбранные технические поля и сохраняет различие между отсутствием, `null`, пустой строкой и числом, включая исходную точность. Имена, логины, исходник, IP и текст логов туда не включаются. Неизвестные или неразбираемые времена остаются в raw-полях и не превращаются в вымышленные timestamps.
+
+Новый `GetSubmissionsPage` получает конкретную страницу (`pageIndex >= 1`, `pageSize >= 1`) и возвращает её номер/размер вместе с optional `upstreamPageCount`. Это upstream-число элементов данной страницы, а не число страниц и не общий размер списка. Страницу 3 можно запросить независимо от того, была ли страница 2 пустой. Поле `Submission.observation` дополняет старое преобразование точными score/verdict-текстами, nullable временами и выбранными raw-полями. Старые поля и RPC сохраняются.
+
+`GetStandings` возвращает запрошенные параметры страницы, фактический optional `totalEntitiesCount` и исходные строки оценок строки/задачи в `scoreText`. Отсутствующий total не заменяется числом полученных строк. Наличие total помогает обнаружить неполный обход, но само по себе не гарантирует неизменность страниц между запросами.
+
+Старый streaming RPC `GetSubmissions` сохранён для совместимости. Его историческое условие завершения использует upstream `count` как общий размер, хотя у источника это число элементов страницы; этот RPC не является доказательством полного обхода. Новый постраничный RPC также не обещает `complete`: без дополнительного протокола сверки потребитель не может доказать полноту лишь по пустой странице или page-count. Полный цикл импорта Judge, обработка всех страниц и приёмка живого источника остаются отдельным этапом.
+
+При non-success HTTP-ответах новый reader возвращает безопасный gRPC status без body источника: 401 → `Unauthenticated`, 403 → `PermissionDenied`, 404 → `NotFound`, 429 → `ResourceExhausted`, 5xx → `Unavailable`, остальные non-success → `FailedPrecondition`. Некорректное тело → `DataLoss`; отмена передаётся исходящему запросу и чтению тела. HTTP-ответ освобождается после чтения или ошибки.
+
 ## Структура репозитория
 
 ```text
@@ -49,7 +63,7 @@ flowchart LR
 └── .github/workflows/dotnet.yml
 ```
 
-Тестовых проектов сейчас нет. Общие настройки `TargetFramework`, `Nullable` и `ImplicitUsings` вынесены в корневой `Directory.Build.props`; особенности приложения и ссылки на зависимости остаются в `.csproj`.
+В `tests/Texnokaktus.ProgOlymp.YandexContestIntegrationService.IntegrationTests` находятся NUnit-проверки настоящего gRPC pipeline. Они используют одноразовый Redis, действующий Kiota HTTP adapter с управляемым HTTP handler и настоящий TransferUtility с контролируемым S3-клиентом; внешние Яндекс/OAuth/S3 не вызываются. Проверка отмены требует ошибку RPC без принятого ответа и наблюдаемую отмену исходящего HTTP-вызова до остановки хоста. Конкретный gRPC-код отмены не закреплён: стандартный TestServer pipeline при OperationCanceledException может вернуть Unknown. Общие настройки `TargetFramework`, `Nullable` и `ImplicitUsings` вынесены в корневой `Directory.Build.props`; особенности приложения и ссылки на зависимости остаются в `.csproj`.
 
 ## Подготовка и сборка
 
@@ -76,6 +90,12 @@ dotnet build Texnokaktus.ProgOlymp.YandexContestIntegrationService.slnx --no-res
 ```
 
 URL submodule в `.gitmodules` использует SSH, поэтому для его загрузки нужен настроенный доступ к GitHub по SSH. Версии зависимостей приложения управляются корневым `Directory.Packages.props`.
+
+Интеграционные проверки требуют Docker и запускаются после сборки из корня:
+
+```powershell
+dotnet run --project tests/Texnokaktus.ProgOlymp.YandexContestIntegrationService.IntegrationTests --configuration Debug --no-build -- --minimum-expected-tests 1
+```
 
 ## Конфигурация и зависимости
 
@@ -164,4 +184,4 @@ docker build --platform linux/amd64 --file src/Texnokaktus.ProgOlymp.YandexConte
 
 Контейнер слушает gRPC на порту `8081` и HTTP/1 на `8080`. При запуске передайте переменные из раздела конфигурации и адрес Redis, доступный из сети контейнера. Значение `localhost` внутри контейнера указывает на сам контейнер.
 
-Workflow [.github/workflows/dotnet.yml](.github/workflows/dotnet.yml) запускается при push в `master`: восстанавливает зависимости, собирает solution и выполняет `dotnet test`. После успешной сборки публикует Docker-образы для `linux/amd64` и `linux/arm64` в GHCR и создаёт Git tag. Версия имеет вид `1.<run_number>.<run_attempt>`.
+Workflow [.github/workflows/dotnet.yml](.github/workflows/dotnet.yml) запускается при push в `master`: восстанавливает зависимости, собирает solution и запускает NUnit MTP через `dotnet run --no-build` с `--minimum-expected-tests 1` для тестового проекта. SDK/TFM остаются .NET 10; стандартный legacy `dotnet test` без MTP opt-in для этого runner не поддерживается. После успешной сборки публикует Docker-образы для `linux/amd64` и `linux/arm64` в GHCR и создаёт Git tag. Версия имеет вид `1.<run_number>.<run_attempt>`.

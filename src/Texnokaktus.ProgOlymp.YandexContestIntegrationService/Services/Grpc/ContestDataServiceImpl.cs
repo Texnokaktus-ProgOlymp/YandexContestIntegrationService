@@ -22,49 +22,58 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.Services.Grpc;
 
 public class ContestDataServiceImpl(ContestClient contestClient) : ContestDataService.ContestDataServiceBase
 {
-    public override Task<GetContestUrlResponse> GetContestUrl(GetContestUrlRequest request, ServerCallContext context) =>
-        Task.FromResult<GetContestUrlResponse>(new()
-        {
-            ContestUrl = $"https://contest.yandex.ru/contest/{request.ContestId}/enter/"
-        });
+    public override Task<GetContestUrlResponse> GetContestUrl(
+        GetContestUrlRequest request,
+        ServerCallContext context
+    ) =>
+        Task.FromResult<GetContestUrlResponse>(
+            new() { ContestUrl = $"https://contest.yandex.ru/contest/{request.ContestId}/enter/" }
+        );
 
     public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
     {
         var contestDescription = await contestClient.V2.Contests[request.ContestId].GetAsync();
         var participantStatus = await contestClient.V2.Contests[request.ContestId].Participation.GetAsync();
 
-        return new()
-        {
-            Result = contestDescription?.MapContestDescription(participantStatus)
-        };
+        return new() { Result = contestDescription?.MapContestDescription(participantStatus) };
     }
 
     public override async Task<GetProblemsResponse> GetProblems(GetProblemsRequest request, ServerCallContext context)
     {
         var contestProblems = await contestClient.V2.Contests[request.ContestId].Problems.GetAsync();
 
-        return new()
-        {
-            Problems = { contestProblems?.Problems?.Select(problem => problem.MapContestProblem()) }
-        };
+        return new() { Problems = { contestProblems?.Problems?.Select(problem => problem.MapContestProblem()) } };
     }
 
-    public override async Task<GetStandingsResponse> GetStandings(GetStandingsRequest request, ServerCallContext context)
+    public override async Task<GetStandingsResponse> GetStandings(
+        GetStandingsRequest request,
+        ServerCallContext context
+    )
     {
         var contestStandings = await contestClient.V2
                                                   .Contests[request.ContestId]
                                                   .Standings
-                                                  .GetAsync(configuration =>
-                                                   {
-                                                       configuration.QueryParameters.ForJudge = true;
-                                                       configuration.QueryParameters.Page = request.PageIndex;
-                                                       configuration.QueryParameters.PageSize = request.PageSize;
-                                                       configuration.QueryParameters.ParticipantSearch = request.ParticipantSearch;
-                                                   });
+                                                  .GetAsync(
+                                                       configuration =>
+                                                       {
+                                                           configuration.QueryParameters.ForJudge = true;
+                                                           configuration.QueryParameters.Page = request.PageIndex;
+                                                           configuration.QueryParameters.PageSize = request.PageSize;
+
+                                                           configuration.QueryParameters.ParticipantSearch =
+                                                               request.ParticipantSearch;
+                                                       },
+                                                       context.CancellationToken
+                                                   );
 
         return new()
         {
-            Result = contestStandings?.MapContestStandings()
+            Result = contestStandings?.MapContestStandings(),
+            RequestedPage = new()
+            {
+                PageIndex = request.PageIndex,
+                PageSize = request.PageSize
+            }
         };
     }
 }
@@ -73,7 +82,9 @@ file static class MappingExtensions
 {
     private static readonly CultureInfo RuCultureInfo = CultureInfo.GetCultureInfo("ru-RU");
 
-    public static ContestProblem MapContestProblem(this YandexContestClient.Client.Models.ContestProblem contestProblem) =>
+    public static ContestProblem MapContestProblem(
+        this YandexContestClient.Client.Models.ContestProblem contestProblem
+    ) =>
         new()
         {
             Alias = contestProblem.Alias,
@@ -115,28 +126,43 @@ file static class MappingExtensions
             _                       => throw new ArgumentOutOfRangeException(nameof(statementType), statementType, null)
         };
 
-    public static ContestStandings MapContestStandings(this YandexContestClient.Client.Models.ContestStandings contestStandings) =>
-        new()
+    public static ContestStandings MapContestStandings(
+        this YandexContestClient.Client.Models.ContestStandings contestStandings
+    )
+    {
+        var result = new ContestStandings
         {
-            Rows = { contestStandings.Rows?.Select(row => row.MapContestStandingRow()) },
+            Rows = { contestStandings.Rows?.Select(row => row.MapContestStandingRow()) ?? [] },
             Statistics = contestStandings.Statistics?.MapContestStatistics(),
-            Titles = { contestStandings.Titles?.Select(title => title.MapContestStandingsTitle()) }
+            Titles = { contestStandings.Titles?.Select(title => title.MapContestStandingsTitle()) ?? [] }
         };
 
-    private static ContestStandingRow MapContestStandingRow(this ContestStandingsRow contestStandingsRow) =>
-        new()
+        if (contestStandings.TotalEntitiesCount is { } total) result.TotalEntitiesCount = total;
+
+        return result;
+    }
+
+    private static ContestStandingRow MapContestStandingRow(this ContestStandingsRow contestStandingsRow)
+    {
+        var result = new ContestStandingRow
         {
             ParticipantInfo = contestStandingsRow.ParticipantInfo?.MapParticipantInfo(),
-            PlaceFrom = { contestStandingsRow.PlaceFrom?.Select(i => i!.Value) },
-            PlaceTo = { contestStandingsRow.PlaceTo?.Select(i => i!.Value) },
-            ProblemResults = { contestStandingsRow.ProblemResults?.Select(result => result.MapProblemResult()) },
+            PlaceFrom = { contestStandingsRow.PlaceFrom?.Select(i => i!.Value) ?? [] },
+            PlaceTo = { contestStandingsRow.PlaceTo?.Select(i => i!.Value) ?? [] },
+            ProblemResults = { contestStandingsRow.ProblemResults?.Select(result => result.MapProblemResult()) ?? [] },
             Score = double.TryParse(contestStandingsRow.Score, RuCultureInfo, out var score)
                         ? score
                         : null
         };
 
-    private static ProblemResult MapProblemResult(this YandexContestClient.Client.Models.ProblemResult problemResult) =>
-        new()
+        if (contestStandingsRow.Score is { } text) result.ScoreText = text;
+
+        return result;
+    }
+
+    private static ProblemResult MapProblemResult(this YandexContestClient.Client.Models.ProblemResult problemResult)
+    {
+        var result = new ProblemResult
         {
             Score = double.TryParse(problemResult.Score, RuCultureInfo, out var score)
                         ? score
@@ -148,11 +174,19 @@ file static class MappingExtensions
                 "NOT_SUBMITTED" => SubmissionStatus.NotSubmitted,
                 _               => SubmissionStatus.Other
             },
-            SubmissionCount = int.TryParse(problemResult.SubmissionCount, out var result) ? result : 0,
+            SubmissionCount =
+                int.TryParse(problemResult.SubmissionCount, out var submissionCount) ? submissionCount : 0,
             SubmitDelay = problemResult.SubmitDelay.ToDuration()
         };
 
-    private static ContestStatistics MapContestStatistics(this YandexContestClient.Client.Models.ContestStatistics contestStatistics) =>
+        if (problemResult.Score is { } text) result.ScoreText = text;
+
+        return result;
+    }
+
+    private static ContestStatistics MapContestStatistics(
+        this YandexContestClient.Client.Models.ContestStatistics contestStatistics
+    ) =>
         new()
         {
             LastSubmit = contestStatistics.LastSubmit?.MapSubmitInfo(),
@@ -168,14 +202,19 @@ file static class MappingExtensions
             SubmitTime = submitInfo.SubmitTime.ToDuration()
         };
 
-    private static ContestStandingsTitle MapContestStandingsTitle(this YandexContestClient.Client.Models.ContestStandingsTitle contestStandingsTitle) =>
+    private static ContestStandingsTitle MapContestStandingsTitle(
+        this YandexContestClient.Client.Models.ContestStandingsTitle contestStandingsTitle
+    ) =>
         new()
         {
             Name = contestStandingsTitle.Name,
             Title = contestStandingsTitle.Title
         };
 
-    public static ContestDescription MapContestDescription(this YandexContestClient.Client.Models.ContestDescription contestDescription, ParticipantStatus? participantStatus) =>
+    public static ContestDescription MapContestDescription(
+        this YandexContestClient.Client.Models.ContestDescription contestDescription,
+        ParticipantStatus? participantStatus
+    ) =>
         new()
         {
             Name = contestDescription.Name,
@@ -189,19 +228,27 @@ file static class MappingExtensions
     private static ContestType MapContestType(this ContestDescription_type? contestType) =>
         contestType switch
         {
-            ContestDescription_type.USUAL   => ContestType.Usual,
+            ContestDescription_type.USUAL => ContestType.Usual,
             ContestDescription_type.VIRTUAL => ContestType.Virtual,
-            null                            => throw new ArgumentNullException(nameof(contestType)),
-            _                               => throw new ArgumentOutOfRangeException(nameof(contestType), contestType, "Invalid contest type")
+            null => throw new ArgumentNullException(nameof(contestType)),
+            _ => throw new ArgumentOutOfRangeException(nameof(contestType), contestType, "Invalid contest type")
         };
 
-    private static UpsolvingAllowance MapUpsolvingAllowance(this ContestDescription_upsolvingAllowance? upsolvingAllowance) =>
+    private static UpsolvingAllowance MapUpsolvingAllowance(
+        this ContestDescription_upsolvingAllowance? upsolvingAllowance
+    ) =>
         upsolvingAllowance switch
         {
-            ContestDescription_upsolvingAllowance.PROHIBITED                       => UpsolvingAllowance.Prohibited,
-            ContestDescription_upsolvingAllowance.ALLOWED_AFTER_PARTICIPATION_ENDS => UpsolvingAllowance.AllowedAfterParticipationEnds,
-            ContestDescription_upsolvingAllowance.ALLOWED_AFTER_CONTEST_ENDS       => UpsolvingAllowance.AllowedAfterContestEnds,
-            null                                                                   => throw new ArgumentNullException(nameof(upsolvingAllowance)),
-            _                                                                      => throw new ArgumentOutOfRangeException(nameof(upsolvingAllowance), upsolvingAllowance, "Invalid upsolving allowance type")
+            ContestDescription_upsolvingAllowance.PROHIBITED => UpsolvingAllowance.Prohibited,
+            ContestDescription_upsolvingAllowance.ALLOWED_AFTER_PARTICIPATION_ENDS => UpsolvingAllowance
+               .AllowedAfterParticipationEnds,
+            ContestDescription_upsolvingAllowance.ALLOWED_AFTER_CONTEST_ENDS => UpsolvingAllowance
+               .AllowedAfterContestEnds,
+            null => throw new ArgumentNullException(nameof(upsolvingAllowance)),
+            _ => throw new ArgumentOutOfRangeException(
+                     nameof(upsolvingAllowance),
+                     upsolvingAllowance,
+                     "Invalid upsolving allowance type"
+                 )
         };
 }

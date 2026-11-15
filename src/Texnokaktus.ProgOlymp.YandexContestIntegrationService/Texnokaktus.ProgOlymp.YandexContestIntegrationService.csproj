@@ -23,6 +23,8 @@
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
+    <PackageReference Include="Microsoft.Kiota.Abstractions" />
+    <PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" />
     <PackageReference Include="MimeKitLite" />
     <PackageReference Include="Texnokaktus.ProgOlymp.Platform" />
     <PackageReference Include="YandexContestClient" />
