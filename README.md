@@ -123,6 +123,10 @@ dotnet run --project tests/Texnokaktus.ProgOlymp.YandexContestIntegrationService
 
 Для сохранения исходников подготовьте bucket `submissions` и доступ на запись объектов в него. Имя bucket задано в `SubmissionServiceImpl`, отдельного параметра конфигурации для него сейчас нет. S3 используется методом `DownloadSubmissionSource`.
 
+Новые выгрузки используют ключ `contests/{contestId}/submissions/{runId}/source`: одинаковый upstream filename разных посылок больше не перезаписывает один объект, а повтор того же contest/run сохраняет тот же ключ. `DownloadSubmissionSourceResponse.fileName` (прежний tag 1) содержит фактический Upload.Key; потребитель хранит эту строку без восстановления формулы. Старые объекты и ссылки не переименовываются и не удаляются. Доступные upstream Content-Type и Content-Disposition сохраняются в стандартных S3 headers; при отсутствии заголовков используются `application/octet-stream` и attachment с RunId вместо имени. Байты передаются потоком без декодирования, response и поток освобождаются после завершения, ошибки или отмены upload.
+
+Совместимость прежнего protobuf tag подтверждается binary-проверкой. В проверенных read-only срезах Result `2c60365` и Api `56b9332` production-вызов исходников не найден; работа такого потребителя этой проверкой не подтверждается.
+
 ## Локальный запуск
 
 После сборки подготовьте Redis с ключами Data Protection, OAuth-приложение Яндекса и, для выгрузки исходников, S3-хранилище. Задайте настройки в окружении текущего процесса, например в PowerShell:

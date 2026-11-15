@@ -10,8 +10,12 @@ namespace Texnokaktus.ProgOlymp.YandexContestIntegrationService.IntegrationTests
 public sealed class ControlledStorage
 {
     public IAmazonS3 Client { get; } = Substitute.For<IAmazonS3>();
-    public ConcurrentQueue<(string Bucket, string Key, string Body)> Uploads { get; } = new();
+
+    public ConcurrentQueue<(string Bucket, string Key, byte[] Body, string? ContentType, string? ContentDisposition)>
+        Uploads { get; } = new();
+
     public bool FailUploads { get; set; }
+    public Func<CancellationToken, Task>? BeforeUploadComplete { get; set; }
 
     public ControlledStorage()
     {
@@ -22,11 +26,15 @@ public sealed class ControlledStorage
                    {
                        var request = call.Arg<PutObjectRequest>();
                        var cancellationToken = call.Arg<CancellationToken>();
-                       using var reader = new StreamReader(request.InputStream, leaveOpen: true);
+                       using var buffer = new MemoryStream();
+                       await request.InputStream.CopyToAsync(buffer, cancellationToken);
 
                        Uploads.Enqueue(
-                           (request.BucketName, request.Key, await reader.ReadToEndAsync(cancellationToken))
+                           (request.BucketName, request.Key, buffer.ToArray(), request.ContentType,
+                            request.Headers.ContentDisposition)
                        );
+
+                       if (BeforeUploadComplete is { } complete) await complete(cancellationToken);
 
                        if (FailUploads)
                            throw new AmazonS3Exception("Controlled archive failure");
@@ -40,6 +48,7 @@ public sealed class ControlledStorage
     {
         Uploads.Clear();
         FailUploads = false;
+        BeforeUploadComplete = null;
         Client.ClearReceivedCalls();
     }
 }

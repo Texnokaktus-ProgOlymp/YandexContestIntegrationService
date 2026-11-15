@@ -1,11 +1,12 @@
+using System.Globalization;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using Microsoft.Kiota.Abstractions;
 using Amazon.S3.Transfer;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Kiota.Http.HttpClientLibrary.Middleware.Options;
-using Microsoft.Net.Http.Headers;
-using MimeKit;
 using Texnokaktus.ProgOlymp.Common.Contracts.Grpc.YandexContest;
 using YandexContestClient.Client;
 using YandexContestClient.Client.Models;
@@ -160,45 +161,68 @@ public class SubmissionServiceImpl(ContestClient client, ITransferUtility transf
     /// </summary>
     /// <param name="request">The request object containing the ContestStageId and SubmissionId for which the source needs to be fetched.</param>
     /// <param name="context">The server call context, used to manage metadata and monitor for cancellation.</param>
-    /// <returns>A task representing the asynchronous operation, returning a response containing the file name of the uploaded submission.</returns>
+    /// <returns>A task returning the actual uploaded object key, independent of the upstream file name.</returns>
     public override async Task<DownloadSubmissionSourceResponse> DownloadSubmissionSource(
         DownloadSubmissionSourceRequest request,
         ServerCallContext context
     )
     {
-        var headersInspectionHandlerOption = new HeadersInspectionHandlerOption { InspectResponseHeaders = true };
+        var handler = new NativeResponseHandler();
 
-        await using var stream = await client.V2
-                                             .Contests[request.ContestStageId]
-                                             .Submissions[request.SubmissionId]
-                                             .Source
-                                             .GetAsync(
-                                                  configuration =>
-                                                      configuration.Options.Add(headersInspectionHandlerOption),
-                                                  context.CancellationToken
-                                              );
+        await client.V2.Contests[request.ContestStageId]
+                    .Submissions[request.SubmissionId]
+                    .Source.GetAsync(
+                         configuration =>
+                             configuration.Options.Add(new ResponseHandlerOption { ResponseHandler = handler }),
+                         context.CancellationToken
+                     );
 
-        var key = headersInspectionHandlerOption.ResponseHeaders.TryGetValue(
-                      HeaderNames.ContentDisposition,
-                      out var contentDispositionValues
-                  )
-               && contentDispositionValues.FirstOrDefault() is { } contentDispositionValue
-               && ContentDisposition.TryParse(contentDispositionValue, out var contentDisposition)
-               && contentDisposition.FileName is { } fileName
-                      ? fileName
-                      : request.SubmissionId.ToString();
+        using var response = handler.Value as HttpResponseMessage
+                          ?? throw new RpcException(
+                                 new(StatusCode.Unavailable, "Contest returned no source response.")
+                             );
 
-        await transferUtility.UploadAsync(
-            new()
-            {
-                BucketName = "submissions",
-                Key = key,
-                InputStream = stream
-            },
-            context.CancellationToken
-        );
+        if (!response.IsSuccessStatusCode)
+            throw new RpcException(
+                new(
+                    response.StatusCode switch
+                    {
+                        HttpStatusCode.Unauthorized           => StatusCode.Unauthenticated,
+                        HttpStatusCode.Forbidden              => StatusCode.PermissionDenied,
+                        HttpStatusCode.NotFound               => StatusCode.NotFound,
+                        HttpStatusCode.TooManyRequests        => StatusCode.ResourceExhausted,
+                        >= HttpStatusCode.InternalServerError => StatusCode.Unavailable,
+                        _                                     => StatusCode.FailedPrecondition
+                    },
+                    "Contest rejected the source request."
+                )
+            );
 
-        return new() { FileName = key };
+        await using var stream = await response.Content.ReadAsStreamAsync(context.CancellationToken);
+
+        var upload = new TransferUtilityUploadRequest
+        {
+            BucketName = "submissions",
+            Key =
+                FormattableString.Invariant(
+                    $"contests/{request.ContestStageId}/submissions/{request.SubmissionId}/source"
+                ),
+            InputStream = stream,
+            AutoCloseStream = false,
+            ContentType = response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream"
+        };
+
+        upload.Headers.ContentDisposition = response.Content.Headers.ContentDisposition?.ToString()
+                                         ?? new ContentDispositionHeaderValue("attachment")
+                                            {
+                                                FileName = request.SubmissionId.ToString(
+                                                    CultureInfo.InvariantCulture
+                                                )
+                                            }.ToString();
+
+        await transferUtility.UploadAsync(upload, context.CancellationToken);
+
+        return new() { FileName = upload.Key };
     }
 
     /// <summary>
