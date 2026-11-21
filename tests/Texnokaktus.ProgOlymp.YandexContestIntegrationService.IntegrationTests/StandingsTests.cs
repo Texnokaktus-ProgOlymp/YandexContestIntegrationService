@@ -63,6 +63,55 @@ public sealed class StandingsTests : SetupBase
         );
     }
 
+    [TestCase("", false, "")]
+    [TestCase(",\"id\":null", false, "")]
+    [TestCase(",\"id\":\"\"", true, "")]
+    [TestCase(",\"id\":\"0007-a/b\"", true, "0007-a/b")]
+    public async Task TitleIdRetainsPresenceAndExactOpaqueValue(string idField, bool present, string expected)
+    {
+        Factory.Upstream.EnqueueJson(
+            $$"""{"rows":[],"titles":[{"name":"alias","title":"Visible title"{{idField}}}]}"""
+        );
+
+        var response = await Read();
+        var title = response.Result.Titles.Single();
+        Assert.That(title.HasId, Is.EqualTo(present));
+        Assert.That(title.Id, Is.EqualTo(expected));
+        Assert.That(title.Name, Is.EqualTo("alias"));
+        Assert.That(title.Title, Is.EqualTo("Visible title"));
+    }
+
+    [Test]
+    public async Task TwoTitleIdentitiesStayAlignedWithPositionalProblemScores()
+    {
+        Factory.Upstream.EnqueueJson(
+            """
+            {"titles":[{"id":"0007-a/b","name":"same alias","title":"Alpha"},
+                       {"id":"second","name":"same alias","title":"Beta"}],
+             "rows":[{"problemResults":[{"score":"1.005"},{"score":"0"}]}]}
+            """
+        );
+
+        var response = await Read();
+        var titles = response.Result.Titles;
+        var results = response.Result.Rows.Single().ProblemResults;
+        Assert.That(titles.Count, Is.EqualTo(2));
+        Assert.That(results.Count, Is.EqualTo(2));
+        Assert.That(titles.All(title => title.HasId), Is.True);
+        Assert.That(results.All(result => result.HasScoreText), Is.True);
+
+        Assert.That(
+            titles.Zip(results, (title, result) => (title.Id, title.Title, result.ScoreText)),
+            Is.EqualTo(
+                new[]
+                {
+                    ("0007-a/b", "Alpha", "1.005"),
+                    ("second", "Beta", "0")
+                }
+            )
+        );
+    }
+
     private async Task<GetStandingsResponse> Read() => await Api.Unary(
                                                                      ContestServiceName,
                                                                      "GetStandings",

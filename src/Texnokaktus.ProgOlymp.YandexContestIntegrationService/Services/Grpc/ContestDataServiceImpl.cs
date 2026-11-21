@@ -204,12 +204,18 @@ file static class MappingExtensions
 
     private static ContestStandingsTitle MapContestStandingsTitle(
         this YandexContestClient.Client.Models.ContestStandingsTitle contestStandingsTitle
-    ) =>
-        new()
+    )
+    {
+        var result = new ContestStandingsTitle
         {
             Name = contestStandingsTitle.Name,
             Title = contestStandingsTitle.Title
         };
+
+        if (contestStandingsTitle.Id is { } id) result.Id = id;
+
+        return result;
+    }
 
     public static ContestDescription MapContestDescription(
         this YandexContestClient.Client.Models.ContestDescription contestDescription,
