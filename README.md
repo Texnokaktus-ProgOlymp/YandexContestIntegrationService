@@ -41,6 +41,19 @@ flowchart LR
 
 При non-success HTTP-ответах новый reader возвращает безопасный gRPC status без body источника: 401 → `Unauthenticated`, 403 → `PermissionDenied`, 404 → `NotFound`, 429 → `ResourceExhausted`, 5xx → `Unavailable`, остальные non-success → `FailedPrecondition`. Некорректное тело → `DataLoss`; отмена передаётся исходящему запросу и чтению тела. HTTP-ответ освобождается после чтения или ошибки.
 
+### Описание без участия владельца
+
+GetContestRequest.descriptionOnly=true получает описание соревнования без запроса
+/participation владельца токена; FinishTime в таком ответе отсутствует. Прежний
+запрос без флага или с false сохраняет обращение к владельцу и прежний FinishTime.
+Оба исходящих вызова поддерживают отмену RPC.
+
+У поля ContestDescription.upsolvingAllowance сохранены protobuf tag 6 и значения
+enum; добавлена presence. Явный PROHIBITED=0 имеет HasUpsolvingAllowance=true.
+Старый producer, опускающий default 0, даёт отсутствие presence: новый потребитель
+не должен принимать это за подтверждённый запрет дорешивания. Неизвестная или
+отсутствующая настройка SDK по-прежнему приводит к ошибке, без подстановки нуля.
+Наличие настройки не подтверждает закрытие окна стартов или готовность тура.
 ## Структура репозитория
 
 ```text

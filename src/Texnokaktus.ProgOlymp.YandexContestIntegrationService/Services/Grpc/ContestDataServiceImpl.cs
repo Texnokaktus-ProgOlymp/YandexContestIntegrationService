@@ -32,8 +32,14 @@ public class ContestDataServiceImpl(ContestClient contestClient) : ContestDataSe
 
     public override async Task<GetContestResponse> GetContest(GetContestRequest request, ServerCallContext context)
     {
-        var contestDescription = await contestClient.V2.Contests[request.ContestId].GetAsync();
-        var participantStatus = await contestClient.V2.Contests[request.ContestId].Participation.GetAsync();
+        var contestDescription = await contestClient.V2.Contests[request.ContestId]
+                                                    .GetAsync(cancellationToken: context.CancellationToken);
+
+        var participantStatus = request.DescriptionOnly
+                                    ? null
+                                    : await contestClient.V2.Contests[request.ContestId]
+                                                         .Participation
+                                                         .GetAsync(cancellationToken: context.CancellationToken);
 
         return new() { Result = contestDescription?.MapContestDescription(participantStatus) };
     }
